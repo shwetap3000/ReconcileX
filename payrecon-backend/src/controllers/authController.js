@@ -1,4 +1,5 @@
 import User from "../models/User.js";
+import generateToken from "../utils/generateToken.js";
 
 export const register = async (req, res) => {
   try {
@@ -21,6 +22,13 @@ export const register = async (req, res) => {
       password,
     });
 
+    const token = generateToken(user._id);
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    })
+
     res.status(201).json({
       success: true,
       message: "User registered successfully",
@@ -36,5 +44,7 @@ export const register = async (req, res) => {
       success: false,
       message: error.message,
     });
+
+    console.log(error.message)
   }
 };
