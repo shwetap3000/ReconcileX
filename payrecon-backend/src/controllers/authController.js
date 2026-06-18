@@ -29,8 +29,8 @@ export const register = async (req, res) => {
       httpOnly: true,
       maxAge: 7 * 24 * 60 * 60 * 1000,
       secure: false,
-  sameSite: "lax",
-    })
+      sameSite: "lax",
+    });
 
     res.status(201).json({
       success: true,
@@ -48,10 +48,9 @@ export const register = async (req, res) => {
       message: error.message,
     });
 
-    console.log(error.message)
+    console.log(error.message);
   }
 };
-
 
 // login controller
 
@@ -68,9 +67,7 @@ export const login = async (req, res) => {
       });
     }
 
-    const isMatch = await user.comparePassword(
-      password
-    );
+    const isMatch = await user.comparePassword(password);
 
     if (!isMatch) {
       return res.status(401).json({
@@ -85,7 +82,7 @@ export const login = async (req, res) => {
       httpOnly: true,
       maxAge: 7 * 24 * 60 * 60 * 1000,
       secure: false,
-  sameSite: "lax",
+      sameSite: "lax",
     });
 
     res.status(200).json({
@@ -104,4 +101,15 @@ export const login = async (req, res) => {
       message: error.message,
     });
   }
+};
+
+
+export const getMe = async (
+  req,
+  res
+) => {
+  res.status(200).json({
+    success: true,
+    user: req.user,
+  });
 };
