@@ -82,3 +82,7 @@
 * Modular architecture.
 * Proper API documentation.
 * Clean code structure.
+
+
+
+Audit records should never be deleted or edited.

@@ -18,6 +18,8 @@ webhook duplication
 IFSC
 SAP
 ERP systems
+Segregation of Duties (SoD) (maker, checker)
+Soft Delete
 
 
 
