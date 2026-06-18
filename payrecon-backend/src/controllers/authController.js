@@ -53,7 +53,6 @@ export const register = async (req, res) => {
 };
 
 // login controller
-
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -67,6 +66,13 @@ export const login = async (req, res) => {
       });
     }
 
+    if (!user.isActive) {
+      return res.status(403).json({
+        success: false,
+        message: "Account is disabled",
+      });
+    }
+
     const isMatch = await user.comparePassword(password);
 
     if (!isMatch) {
@@ -75,6 +81,9 @@ export const login = async (req, res) => {
         message: "Invalid credentials",
       });
     }
+
+    user.lastLogin = new Date();
+    await user.save();
 
     const token = generateToken(user._id);
 
@@ -103,13 +112,20 @@ export const login = async (req, res) => {
   }
 };
 
-
-export const getMe = async (
-  req,
-  res
-) => {
+// to get the user profile
+export const getMe = async (req, res) => {
   res.status(200).json({
     success: true,
     user: req.user,
+  });
+};
+
+// logout controller
+export const logout = async (req, res) => {
+  res.clearCookie("token");
+
+  res.status(200).json({
+    success: true,
+    message: "Logged out successfully",
   });
 };
