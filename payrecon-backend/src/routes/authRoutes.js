@@ -6,7 +6,7 @@ import {
   logout,
 } from "../controllers/authController.js";
 import { protect } from "../middleware/authMiddleware.js";
-import { authorizeRoles } from "../middleware/authorizeRole.js";
+import { authorizeRoles } from "../middleware/authorizeRoles.js";
 
 
 const router = express.Router();

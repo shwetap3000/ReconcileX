@@ -22,6 +22,7 @@ Segregation of Duties (SoD) (maker, checker)
 Soft Delete
 Principle of Least Privilege (Principle of Least Privilege)
 XSS attack
+what is difference between authentication and authorization
 
 
 
