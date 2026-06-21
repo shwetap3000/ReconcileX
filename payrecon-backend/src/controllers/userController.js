@@ -83,3 +83,60 @@ export const updateUserRole = async (req, res) => {
     });
   }
 };
+
+// to update the user status expect the admin
+export const updateUserStatus = async (req, res) => {
+  try {
+    const { isActive } = req.body;
+
+    const user = await User.findById(req.params.id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    // Prevent self deactivation
+    if (
+      user._id.toString() === req.user._id.toString()
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "You cannot deactivate your own account",
+      });
+    }
+
+    // Already same status
+    if (user.isActive === isActive) {
+      return res.status(400).json({
+        success: false,
+        message: `User is already ${
+          isActive ? "active" : "inactive"
+        }`,
+      });
+    }
+
+    user.isActive = isActive;
+
+    await user.save();
+
+    const updatedUser = await User.findById(
+      user._id
+    ).select("-password");
+
+    res.status(200).json({
+      success: true,
+      message: `User ${
+        isActive ? "activated" : "deactivated"
+      } successfully`,
+      user: updatedUser,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
