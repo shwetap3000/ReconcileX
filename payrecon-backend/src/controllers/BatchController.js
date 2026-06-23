@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import Batch from "../models/Batch.js";
 import generateBatchId from "../utils/generateBatchId.js";
 
@@ -69,4 +70,32 @@ export const getBatches = async (req, res) => {
   }
 };
 
-// add paginated batch listing endpoint
+export const getBatchById = async (req, res) => {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid batch ID",
+      });
+    }
+
+    const batch = await Batch.findById(req.params.id);
+
+    if (!batch) {
+      return res.status(404).json({
+        success: false,
+        message: "Batch not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      batch,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
