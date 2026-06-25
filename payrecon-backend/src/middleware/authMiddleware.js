@@ -3,6 +3,8 @@ import User from "../models/User.js";
 
 export const protect = async (req, res, next) => {
   try {
+
+    console.log("Protect middleware executed");
     const token = req.cookies.token;
 
     if (!token) {

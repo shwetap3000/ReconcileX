@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import Batch from "../models/Batch.js";
 import generateBatchId from "../utils/generateBatchId.js";
+import BatchFile from "../models/BatchFile.js";
 
 export const createBatch = async (req, res) => {
   try {
