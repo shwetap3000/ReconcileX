@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import Batch from "../models/Batch.js";
 import generateBatchId from "../utils/generateBatchId.js";
 import BatchFile from "../models/BatchFile.js";
+import uploadToCloudinary from "../utils/uploadToCloudinary.js";
 
 export const createBatch = async (req, res) => {
   try {
@@ -95,6 +96,59 @@ export const getBatchById = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export const uploadLedgerFile = async (req, res) => {
+  try {
+    // check if id is a valid mongodb id
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid Batch ID",
+      });
+    }
+
+    // check if batch exists
+    const batch = await Batch.findById(req.params.id);
+
+    if (!batch) {
+      return res.status(404).json({
+        success: false,
+        message: "Batch not found",
+      });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "No file uploaded",
+      });
+    }
+
+    // // upload file to cloudinary
+    // const cloudinaryResponse = await uploadToCloudinary(
+    //   req.file.path,
+    //   "payrecon/ledger",
+    // );
+
+    return res.status(200).json({
+      success: true,
+      message: "Upload successful",
+      batch,
+    });
+
+    // return res.status(200).json({
+    //   success: true,
+    //   message: "Uploaded to Cloudinary successfully",
+    //   batch,
+    //   cloudinaryResponse,
+    // });
+  } catch (error) {
+    return res.status(500).json({
       success: false,
       message: error.message,
     });
