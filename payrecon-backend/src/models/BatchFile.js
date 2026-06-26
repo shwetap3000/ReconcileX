@@ -8,56 +8,51 @@ const batchFileSchema = new mongoose.Schema(
       required: true,
     },
 
-    fileType: {
-      type: String,
-      enum: ["LEDGER", "BANK"],
-      required: true,
-    },
-
-    version: {
-      type: Number,
-      required: true,
-    },
-
-    fileName: {
-      type: String,
-      required: true,
-    },
-
-    fileUrl: {
-      type: String,
-      required: true,
-    },
-
-    cloudinaryId: {
-      type: String,
-      required: true,
-    },
-
     uploadedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
 
-    uploadedByName: {
+    originalFileName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    storedFileName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    filePath: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    mimeType: {
       type: String,
       required: true,
     },
 
-    isActive: {
-      type: Boolean,
-      default: true,
+    fileSize: {
+      type: Number,
+      required: true,
+    },
+
+    uploadStatus: {
+      type: String,
+      enum: ["UPLOADED", "PROCESSING", "PROCESSED", "FAILED"],
+      default: "UPLOADED",
     },
   },
   {
     timestamps: true,
-  }
+  },
 );
 
-const BatchFile = mongoose.model(
-  "BatchFile",
-  batchFileSchema
-);
+const BatchFile = mongoose.model("BatchFile", batchFileSchema);
 
 export default BatchFile;

@@ -14,6 +14,13 @@ const batchSchema = new mongoose.Schema(
       trim: true,
     },
 
+    files: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "BatchFile",
+      },
+    ],
+
     status: {
       type: String,
       enum: [

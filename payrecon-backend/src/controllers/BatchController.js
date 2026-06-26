@@ -135,18 +135,29 @@ export const uploadLedgerFile = async (req, res) => {
     //   "payrecon/ledger",
     // );
 
+    const batchFile = await BatchFile.create({
+      batchId: batch._id,
+      uploadedBy: req.user._id,
+
+      originalFileName: req.file.originalname,
+      storedFileName: req.file.filename,
+
+      filePath: req.file.path,
+
+      mimeType: req.file.mimetype,
+      fileSize: req.file.size,
+    });
+
+    // Link the file to the batch
+    batch.files.push(batchFile._id);
+    await batch.save();
+
     return res.status(200).json({
       success: true,
       message: "Upload successful",
       batch,
+      batchFile,
     });
-
-    // return res.status(200).json({
-    //   success: true,
-    //   message: "Uploaded to Cloudinary successfully",
-    //   batch,
-    //   cloudinaryResponse,
-    // });
   } catch (error) {
     return res.status(500).json({
       success: false,
