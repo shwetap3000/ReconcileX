@@ -4,6 +4,7 @@ import generateBatchId from "../utils/generateBatchId.js";
 import BatchFile from "../models/BatchFile.js";
 import uploadToCloudinary from "../utils/uploadToCloudinary.js";
 import { readExcelFile } from "../services/excelService.js";
+import validateLedger from "../utils/validateLedger.js";
 
 export const createBatch = async (req, res) => {
   try {
@@ -153,8 +154,23 @@ export const uploadLedgerFile = async (req, res) => {
     batch.files.push(batchFile._id);
     await batch.save();
 
-    const excelData = readExcelFile(req.file.path);
-    console.log(excelData);
+    // to parse the excel file
+    const rows = readExcelFile(req.file.path);
+
+    // to validate the uploaded excel file
+
+    const validation = validateLedger(rows);
+    console.log(validation);
+
+    if (!validation.isValid) {
+      return res.status(400).json({
+        success: false,
+        message: "Validation failed",
+        fileErrors: validation.fileErrors,
+        rowErrors: validation.rowErrors,
+        warnings: validation.warnings,
+      });
+    }
 
     return res.status(200).json({
       success: true,
