@@ -3,6 +3,7 @@ import Batch from "../models/Batch.js";
 import generateBatchId from "../utils/generateBatchId.js";
 import BatchFile from "../models/BatchFile.js";
 import uploadToCloudinary from "../utils/uploadToCloudinary.js";
+import { readExcelFile } from "../services/excelService.js";
 
 export const createBatch = async (req, res) => {
   try {
@@ -151,6 +152,9 @@ export const uploadLedgerFile = async (req, res) => {
     // Link the file to the batch
     batch.files.push(batchFile._id);
     await batch.save();
+
+    const excelData = readExcelFile(req.file.path);
+    console.log(excelData);
 
     return res.status(200).json({
       success: true,
