@@ -1,10 +1,13 @@
 import mongoose from "mongoose";
+import fs from "fs";
+
 import Batch from "../models/Batch.js";
 import generateBatchId from "../utils/generateBatchId.js";
 import BatchFile from "../models/BatchFile.js";
 import uploadToCloudinary from "../utils/uploadToCloudinary.js";
 import { readExcelFile } from "../services/excelService.js";
 import validateLedger from "../utils/validateLedger.js";
+import LedgerTransaction from "../models/ledgerTransaction.js";
 
 export const createBatch = async (req, res) => {
   try {
@@ -106,7 +109,7 @@ export const getBatchById = async (req, res) => {
 
 export const uploadLedgerFile = async (req, res) => {
   try {
-    // check if id is a valid mongodb id
+    // Check if Batch ID is valid
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
       return res.status(400).json({
         success: false,
@@ -114,7 +117,7 @@ export const uploadLedgerFile = async (req, res) => {
       });
     }
 
-    // check if batch exists
+    // Check if batch exists
     const batch = await Batch.findById(req.params.id);
 
     if (!batch) {
@@ -124,6 +127,7 @@ export const uploadLedgerFile = async (req, res) => {
       });
     }
 
+    // Check if file exists
     if (!req.file) {
       return res.status(400).json({
         success: false,
@@ -131,12 +135,19 @@ export const uploadLedgerFile = async (req, res) => {
       });
     }
 
-    // // upload file to cloudinary
-    // const cloudinaryResponse = await uploadToCloudinary(
-    //   req.file.path,
-    //   "payrecon/ledger",
-    // );
+    // Prevent duplicate ledger uploads
+    const existingTransactions = await LedgerTransaction.countDocuments({
+      batchId: batch._id,
+    });
 
+    if (existingTransactions > 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Ledger file has already been uploaded for this batch.",
+      });
+    }
+
+    // Save uploaded file details
     const batchFile = await BatchFile.create({
       batchId: batch._id,
       uploadedBy: req.user._id,
@@ -150,17 +161,11 @@ export const uploadLedgerFile = async (req, res) => {
       fileSize: req.file.size,
     });
 
-    // Link the file to the batch
-    batch.files.push(batchFile._id);
-    await batch.save();
-
-    // to parse the excel file
+    // Read Excel
     const rows = readExcelFile(req.file.path);
 
-    // to validate the uploaded excel file
-
+    // Validate Excel
     const validation = validateLedger(rows);
-    console.log(validation);
 
     if (!validation.isValid) {
       return res.status(400).json({
@@ -172,9 +177,38 @@ export const uploadLedgerFile = async (req, res) => {
       });
     }
 
+    // Convert Excel rows into LedgerTransaction documents
+    const ledgerTransactions = rows.map((row) => ({
+      batchId: batch._id,
+
+      transactionId: row["Transaction ID"],
+
+      referenceNumber: row["Reference Number"],
+
+      transactionDate: new Date(row["Transaction Date"]),
+
+      amount: Number(row["Amount"]),
+
+      status: "PENDING",
+    }));
+
+    // Bulk insert transactions
+    await LedgerTransaction.insertMany(ledgerTransactions);
+
+    // Update batch
+    batch.files.push(batchFile._id);
+    batch.totalLedgerTransactions = ledgerTransactions.length;
+    batch.status = "PARTIAL_UPLOAD";
+
+    await batch.save();
+
+    // Delete local uploaded file
+    fs.unlinkSync(req.file.path);
+
     return res.status(200).json({
       success: true,
-      message: "Upload successful",
+      message: "Ledger uploaded successfully",
+      totalTransactions: ledgerTransactions.length,
       batch,
       batchFile,
     });
