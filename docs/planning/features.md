@@ -1,5 +1,7 @@
 # Features
 
+![alt text](image.png)
+
 ## 1. Project Setup
 
 * Project Initialization

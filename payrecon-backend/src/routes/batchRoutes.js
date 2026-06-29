@@ -4,6 +4,7 @@ import {
   getBatches,
   getBatchById,
   uploadLedgerFile,
+  uploadBankFile,
 } from "../controllers/batchController.js";
 import { protect } from "../middleware/authMiddleware.js";
 import { authorizeRoles } from "../middleware/authorizeRoles.js";
@@ -21,6 +22,14 @@ router.post(
   authorizeRoles("MAKER", "ADMIN"),
   upload.single("file"),
   uploadLedgerFile,
+);
+
+router.post(
+  "/:id/upload-bank",
+  protect,
+  authorizeRoles("MAKER", "ADMIN"),
+  upload.single("file"),
+  uploadBankFile,
 );
 router.get("/:id", protect, authorizeRoles("ADMIN", "MAKER"), getBatchById);
 

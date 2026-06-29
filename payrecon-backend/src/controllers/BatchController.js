@@ -6,8 +6,10 @@ import generateBatchId from "../utils/generateBatchId.js";
 import BatchFile from "../models/BatchFile.js";
 import uploadToCloudinary from "../utils/uploadToCloudinary.js";
 import { readExcelFile } from "../services/excelService.js";
-import validateLedger from "../utils/validateLedger.js";
-import LedgerTransaction from "../models/ledgerTransaction.js";
+import validateLedger from "../services/validateLedger.js";
+import validateBank from "../services/validateBank.js";
+import BankTransaction from "../models/BankTransaction.js";
+import LedgerTransaction from "../models/LedgerTransaction.js";
 
 export const createBatch = async (req, res) => {
   try {
@@ -212,6 +214,16 @@ export const uploadLedgerFile = async (req, res) => {
       batch,
       batchFile,
     });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export const uploadBankFile = async (req, res) => {
+  try {
   } catch (error) {
     return res.status(500).json({
       success: false,
