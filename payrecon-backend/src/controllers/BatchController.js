@@ -154,6 +154,10 @@ export const uploadLedgerFile = async (req, res) => {
       batchId: batch._id,
       uploadedBy: req.user._id,
 
+      fileType: "LEDGER",
+      version: 1,
+      isActive: true,
+
       originalFileName: req.file.originalname,
       storedFileName: req.file.filename,
 
@@ -224,6 +228,114 @@ export const uploadLedgerFile = async (req, res) => {
 
 export const uploadBankFile = async (req, res) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid Batch ID",
+      });
+    }
+
+    const batch = await Batch.findById(req.params.id);
+
+    if (!batch) {
+      return res.status(404).json({
+        success: false,
+        message: "Batch not found",
+      });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "No file uploaded",
+      });
+    }
+
+    const existingTransactions = await BankTransaction.countDocuments({
+      batchId: batch._id,
+    });
+
+    if (existingTransactions > 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Bank file has already been uploaded for this batch.",
+      });
+    }
+
+    const batchFile = await BatchFile.create({
+      batchId: batch._id,
+
+      fileType: "BANK",
+
+      version: 1,
+
+      isActive: true,
+
+      uploadedBy: req.user._id,
+
+      originalFileName: req.file.originalname,
+      storedFileName: req.file.filename,
+
+      filePath: req.file.path,
+
+      mimeType: req.file.mimetype,
+
+      fileSize: req.file.size,
+    });
+
+    const rows = readExcelFile(req.file.path);
+
+    const validation = validateBank(rows);
+
+    if (!validation.isValid) {
+      return res.status(400).json({
+        success: false,
+        message: "Validation failed",
+        fileErrors: validation.fileErrors,
+        rowErrors: validation.rowErrors,
+        warnings: validation.warnings,
+      });
+    }
+
+    const bankTransactions = rows.map((row) => ({
+      batchId: batch._id,
+
+      transactionId: row["Transaction ID"],
+
+      referenceNumber: row["Reference Number"],
+
+      transactionDate: new Date(row["Transaction Date"]),
+
+      amount: Number(row["Amount"]),
+
+      status: "PENDING",
+    }));
+
+    await BankTransaction.insertMany(bankTransactions);
+
+    batch.files.push(batchFile._id);
+
+    batch.totalBankTransactions = bankTransactions.length;
+
+    if (batch.totalLedgerTransactions > 0) {
+      batch.status = "UPLOADED";
+    } else {
+      batch.status = "PARTIAL_UPLOAD";
+    }
+
+    await batch.save();
+
+    if (fs.existsSync(req.file.path)) {
+      fs.unlinkSync(req.file.path);
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Bank uploaded successfully",
+      totalTransactions: bankTransactions.length,
+      batch,
+      batchFile,
+    });
   } catch (error) {
     return res.status(500).json({
       success: false,

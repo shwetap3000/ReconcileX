@@ -8,6 +8,22 @@ const batchFileSchema = new mongoose.Schema(
       required: true,
     },
 
+    fileType: {
+      type: String,
+      enum: ["LEDGER", "BANK"],
+      required: true,
+    },
+
+    version: {
+      type: Number,
+      default: 1,
+    },
+
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
+
     uploadedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
