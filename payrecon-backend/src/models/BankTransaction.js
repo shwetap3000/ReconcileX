@@ -8,10 +8,10 @@ const bankTransactionSchema = new mongoose.Schema(
       required: true,
     },
 
-    transactionId: {
+    transactionType: {
       type: String,
+      enum: ["DEBIT", "CREDIT"],
       required: true,
-      trim: true,
     },
 
     referenceNumber: {

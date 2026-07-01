@@ -9,10 +9,10 @@ const validateBank = (rows) => {
   }
 
   const requiredColumns = [
-    "Transaction ID",
     "Reference Number",
     "Transaction Date",
     "Amount",
+    "Transaction Type",
   ];
 
   // Check required columns
@@ -34,7 +34,7 @@ const validateBank = (rows) => {
 
     const errors = [];
 
-    if (!row["Transaction ID"]) {
+    if (!row["Transaction Type"]) {
       errors.push("Transaction ID is missing");
     }
 

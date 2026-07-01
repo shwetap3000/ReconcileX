@@ -300,13 +300,10 @@ export const uploadBankFile = async (req, res) => {
     const bankTransactions = rows.map((row) => ({
       batchId: batch._id,
 
-      transactionId: row["Transaction ID"],
-
       referenceNumber: row["Reference Number"],
-
       transactionDate: new Date(row["Transaction Date"]),
-
       amount: Number(row["Amount"]),
+      transactionType: row["Transaction Type"],
 
       status: "PENDING",
     }));
