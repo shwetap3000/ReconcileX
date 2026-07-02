@@ -10,6 +10,7 @@ import validateLedger from "../services/validateLedger.js";
 import validateBank from "../services/validateBank.js";
 import BankTransaction from "../models/BankTransaction.js";
 import LedgerTransaction from "../models/LedgerTransaction.js";
+import reconcileTransactions from "../services/reconcileTransactions.js";
 
 export const createBatch = async (req, res) => {
   try {
@@ -332,6 +333,25 @@ export const uploadBankFile = async (req, res) => {
       totalTransactions: bankTransactions.length,
       batch,
       batchFile,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export const reconcileBatch = async (req, res) => {
+  try {
+    const batchId = req.params.id;
+
+    const result = await reconcileTransactions(batchId);
+
+    return res.status(200).json({
+      success: true,
+      ledgerTransactions: result.ledgerTransactions,
+      bankTransactions: result.bankTransactions,
     });
   } catch (error) {
     return res.status(500).json({

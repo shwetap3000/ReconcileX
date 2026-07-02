@@ -58,11 +58,6 @@ const bankTransactionSchema = new mongoose.Schema(
       ],
       default: "PENDING",
     },
-
-    matchedLedgerTransaction: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "LedgerTransaction",
-    },
   },
   {
     timestamps: true,

@@ -5,6 +5,7 @@ import {
   getBatchById,
   uploadLedgerFile,
   uploadBankFile,
+  reconcileBatch,
 } from "../controllers/batchController.js";
 import { protect } from "../middleware/authMiddleware.js";
 import { authorizeRoles } from "../middleware/authorizeRoles.js";
@@ -31,6 +32,8 @@ router.post(
   upload.single("file"),
   uploadBankFile,
 );
+
+router.post("/:id/reconcile", protect, reconcileBatch);
 router.get("/:id", protect, authorizeRoles("ADMIN", "MAKER"), getBatchById);
 
 export default router;

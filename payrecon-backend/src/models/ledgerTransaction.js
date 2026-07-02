@@ -52,6 +52,7 @@ const ledgerTransactionSchema = new mongoose.Schema(
     matchedBankTransaction: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "BankTransaction",
+      default: null,
     },
   },
   {
