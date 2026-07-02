@@ -36,15 +36,32 @@ const ledgerTransactionSchema = new mongoose.Schema(
       enum: ["PENDING", "MATCHED", "MISMATCH", "MISSING"],
       default: "PENDING",
     },
+
+    reconciliationStatus: {
+      type: String,
+      enum: [
+        "PENDING",
+        "MATCHED",
+        "MISSING_IN_BANK",
+        "AMOUNT_MISMATCH",
+        "DATE_MISMATCH",
+      ],
+      default: "PENDING",
+    },
+
+    matchedBankTransaction: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "BankTransaction",
+    },
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 const LedgerTransaction = mongoose.model(
   "LedgerTransaction",
-  ledgerTransactionSchema
+  ledgerTransactionSchema,
 );
 
 export default LedgerTransaction;
