@@ -352,6 +352,8 @@ export const reconcileBatch = async (req, res) => {
       success: true,
       ledgerTransactions: result.ledgerTransactions,
       bankTransactions: result.bankTransactions,
+      matched: result.matched,
+      missingInBank: result.missingInBank,
     });
   } catch (error) {
     return res.status(500).json({
