@@ -342,6 +342,28 @@ export const uploadBankFile = async (req, res) => {
   }
 };
 
+// export const reconcileBatch = async (req, res) => {
+//   try {
+//     const batchId = req.params.id;
+
+//     const result = await reconcileTransactions(batchId);
+
+//     return res.status(200).json({
+//       success: true,
+//       ledgerTransactions: result.ledgerTransactions,
+//       bankTransactions: result.bankTransactions,
+//       matched: result.matched,
+//       missingInBank: result.missingInBank,
+//     });
+//   } catch (error) {
+//     return res.status(500).json({
+//       success: false,
+//       message: error.message,
+//     });
+//   }
+// };
+
+
 export const reconcileBatch = async (req, res) => {
   try {
     const batchId = req.params.id;
@@ -350,10 +372,7 @@ export const reconcileBatch = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      ledgerTransactions: result.ledgerTransactions,
-      bankTransactions: result.bankTransactions,
-      matched: result.matched,
-      missingInBank: result.missingInBank,
+      ...result,
     });
   } catch (error) {
     return res.status(500).json({
