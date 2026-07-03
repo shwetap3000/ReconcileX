@@ -1,5 +1,6 @@
 # Features
 
+![alt text](features.png)
 ![alt text](image.png)
 
 ## 1. Project Setup
