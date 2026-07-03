@@ -381,3 +381,71 @@ export const reconcileBatch = async (req, res) => {
     });
   }
 };
+
+
+export const getReconciliationSummary = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Check if batch exists
+    const batch = await Batch.findById(id);
+
+    if (!batch) {
+      return res.status(404).json({
+        success: false,
+        message: "Batch not found",
+      });
+    }
+
+    // Total reconciled transactions
+    const totalReconciled =
+      batch.matchedTransactions +
+      batch.amountMismatchCount +
+      batch.dateMismatchCount +
+      batch.missingInBankCount +
+      batch.missingInLedgerCount;
+
+    // Calculate match percentage
+    const matchPercentage =
+      totalReconciled === 0
+        ? 0
+        : Number(
+            (
+              (batch.matchedTransactions / totalReconciled) *
+              100
+            ).toFixed(2)
+          );
+
+    return res.status(200).json({
+      success: true,
+      batch: {
+        _id: batch._id,
+        batchId: batch.batchId,
+        batchName: batch.batchName,
+        status: batch.status,
+        createdBy: batch.createdBy,
+        createdByName: batch.createdByName,
+        createdAt: batch.createdAt,
+        updatedAt: batch.updatedAt,
+      },
+      summary: {
+        totalLedgerTransactions: batch.totalLedgerTransactions,
+        totalBankTransactions: batch.totalBankTransactions,
+
+        matchedTransactions: batch.matchedTransactions,
+        amountMismatchCount: batch.amountMismatchCount,
+        dateMismatchCount: batch.dateMismatchCount,
+        missingInBankCount: batch.missingInBankCount,
+        missingInLedgerCount: batch.missingInLedgerCount,
+
+        totalReconciled,
+        matchPercentage,
+      },
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};

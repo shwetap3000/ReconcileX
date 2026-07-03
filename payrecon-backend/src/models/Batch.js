@@ -78,6 +78,31 @@ const batchSchema = new mongoose.Schema(
       default: 0,
     },
 
+    matchedTransactions: {
+      type: Number,
+      default: 0,
+    },
+
+    amountMismatchCount: {
+      type: Number,
+      default: 0,
+    },
+
+    dateMismatchCount: {
+      type: Number,
+      default: 0,
+    },
+
+    missingInBankCount: {
+      type: Number,
+      default: 0,
+    },
+
+    missingInLedgerCount: {
+      type: Number,
+      default: 0,
+    },
+
     validationErrors: [String],
 
     validationWarnings: [String],
