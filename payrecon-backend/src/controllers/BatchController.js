@@ -546,7 +546,7 @@ export const submitBatch = async (req, res) => {
 // to get all the pending batches to review (for checker)
 export const getPendingReviewBatches = async (req, res) => {
   try {
-    console.log("Controller reached")
+    console.log("Controller reached");
     const batches = await Batch.find({
       status: "SUBMITTED",
     })
@@ -557,6 +557,54 @@ export const getPendingReviewBatches = async (req, res) => {
       success: true,
       total: batches.length,
       batches,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+//
+export const approveBatch = async (req, res) => {
+  try {
+    // check if batch exists
+    const { id } = req.params;
+
+    const batch = await Batch.findById(id);
+
+    if (!batch) {
+      return res.status(404).json({
+        success: false,
+        message: "Batch not found",
+      });
+    }
+
+    // a checker should only approve batches that are submitted
+    if (batch.status !== "SUBMITTED") {
+      return res.status(400).json({
+        success: false,
+        message: "Only submitted batches can be approved.",
+      });
+    }
+
+    // update status
+    batch.status = "APPROVED";
+
+    batch.reviewedBy = req.user._id;
+    batch.reviewedAt = new Date();
+
+    batch.approvedBy = req.user._id;
+    batch.approvedAt = new Date();
+
+    // save batch
+    await batch.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Batch approved successfully.",
+      batch,
     });
   } catch (error) {
     return res.status(500).json({

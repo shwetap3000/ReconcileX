@@ -10,6 +10,7 @@ import {
   getBatchDetails,
   submitBatch,
   getPendingReviewBatches,
+  approveBatch,
 } from "../controllers/batchController.js";
 import { protect } from "../middleware/authMiddleware.js";
 import { authorizeRoles } from "../middleware/authorizeRoles.js";
@@ -49,5 +50,6 @@ router.post("/:id/reconcile", protect, reconcileBatch);
 router.get("/:id", protect, authorizeRoles("ADMIN", "MAKER"), getBatchById);
 router.get("/:id/details", protect, getBatchDetails);
 router.patch("/:id/submit", protect, authorizeRoles("MAKER"), submitBatch);
+router.patch("/:id/approve", protect, authorizeRoles("CHECKER"), approveBatch);
 
 export default router;
