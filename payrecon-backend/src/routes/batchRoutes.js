@@ -9,6 +9,7 @@ import {
   getReconciliationSummary,
   getBatchDetails,
   submitBatch,
+  getPendingReviewBatches,
 } from "../controllers/batchController.js";
 import { protect } from "../middleware/authMiddleware.js";
 import { authorizeRoles } from "../middleware/authorizeRoles.js";
@@ -18,6 +19,13 @@ const router = express.Router();
 
 router.post("/", protect, authorizeRoles("MAKER", "ADMIN"), createBatch);
 router.get("/", protect, authorizeRoles("ADMIN", "MAKER"), getBatches);
+
+router.get(
+  "/pending-review",
+  protect,
+  authorizeRoles("CHECKER"),
+  getPendingReviewBatches,
+);
 
 // always keep specific routes first and parameterized routes later
 router.post(
