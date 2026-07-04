@@ -12,6 +12,7 @@ import BankTransaction from "../models/BankTransaction.js";
 import LedgerTransaction from "../models/LedgerTransaction.js";
 import reconcileTransactions from "../services/reconcileTransactions.js";
 
+// to create a new batch
 export const createBatch = async (req, res) => {
   try {
     const { batchName } = req.body;
@@ -47,6 +48,7 @@ export const createBatch = async (req, res) => {
   }
 };
 
+// to get all the available batches
 export const getBatches = async (req, res) => {
   try {
     const page = Number(req.query.page) || 1;
@@ -80,6 +82,7 @@ export const getBatches = async (req, res) => {
   }
 };
 
+// to get a specific batch by its id
 export const getBatchById = async (req, res) => {
   try {
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
@@ -110,6 +113,7 @@ export const getBatchById = async (req, res) => {
   }
 };
 
+// to upload a ledger file to a specific batch
 export const uploadLedgerFile = async (req, res) => {
   try {
     // Check if Batch ID is valid
@@ -227,6 +231,7 @@ export const uploadLedgerFile = async (req, res) => {
   }
 };
 
+// to upload a bank file to a specific batch
 export const uploadBankFile = async (req, res) => {
   try {
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
@@ -342,28 +347,7 @@ export const uploadBankFile = async (req, res) => {
   }
 };
 
-// export const reconcileBatch = async (req, res) => {
-//   try {
-//     const batchId = req.params.id;
-
-//     const result = await reconcileTransactions(batchId);
-
-//     return res.status(200).json({
-//       success: true,
-//       ledgerTransactions: result.ledgerTransactions,
-//       bankTransactions: result.bankTransactions,
-//       matched: result.matched,
-//       missingInBank: result.missingInBank,
-//     });
-//   } catch (error) {
-//     return res.status(500).json({
-//       success: false,
-//       message: error.message,
-//     });
-//   }
-// };
-
-
+// reconciliation engine controller
 export const reconcileBatch = async (req, res) => {
   try {
     const batchId = req.params.id;
@@ -382,7 +366,7 @@ export const reconcileBatch = async (req, res) => {
   }
 };
 
-
+// to get the summary after reconciliation
 export const getReconciliationSummary = async (req, res) => {
   try {
     const { id } = req.params;
@@ -410,10 +394,7 @@ export const getReconciliationSummary = async (req, res) => {
       totalReconciled === 0
         ? 0
         : Number(
-            (
-              (batch.matchedTransactions / totalReconciled) *
-              100
-            ).toFixed(2)
+            ((batch.matchedTransactions / totalReconciled) * 100).toFixed(2),
           );
 
     return res.status(200).json({
@@ -441,6 +422,78 @@ export const getReconciliationSummary = async (req, res) => {
         totalReconciled,
         matchPercentage,
       },
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// to get the batch details
+export const getBatchDetails = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Check if batch exists
+    const batch = await Batch.findById(id);
+
+    if (!batch) {
+      return res.status(404).json({
+        success: false,
+        message: "Batch not found",
+      });
+    }
+
+    // Fetch uploaded files
+    const files = await BatchFile.find({
+      batchId: id,
+    });
+
+    // Fetch ledger transactions
+    const ledgerTransactions = await LedgerTransaction.find({
+      batchId: id,
+    });
+
+    // Fetch bank transactions
+    const bankTransactions = await BankTransaction.find({
+      batchId: id,
+    });
+
+    // Calculate summary
+    const summary = {
+      totalLedgerTransactions: ledgerTransactions.length,
+      totalBankTransactions: bankTransactions.length,
+
+      matched: ledgerTransactions.filter(
+        (t) => t.reconciliationStatus === "MATCHED",
+      ).length,
+
+      amountMismatch: ledgerTransactions.filter(
+        (t) => t.reconciliationStatus === "AMOUNT_MISMATCH",
+      ).length,
+
+      dateMismatch: ledgerTransactions.filter(
+        (t) => t.reconciliationStatus === "DATE_MISMATCH",
+      ).length,
+
+      missingInBank: ledgerTransactions.filter(
+        (t) => t.reconciliationStatus === "MISSING_IN_BANK",
+      ).length,
+
+      missingInLedger: bankTransactions.filter(
+        (t) => t.reconciliationStatus === "MISSING_IN_LEDGER",
+      ).length,
+    };
+
+    return res.status(200).json({
+      success: true,
+      batch,
+      summary,
+      files,
+      ledgerTransactions,
+      bankTransactions,
     });
   } catch (error) {
     return res.status(500).json({

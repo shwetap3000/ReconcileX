@@ -7,6 +7,7 @@ import {
   uploadBankFile,
   reconcileBatch,
   getReconciliationSummary,
+  getBatchDetails
 } from "../controllers/batchController.js";
 import { protect } from "../middleware/authMiddleware.js";
 import { authorizeRoles } from "../middleware/authorizeRoles.js";
@@ -37,5 +38,6 @@ router.post(
 router.get("/:id/reconciliation-summary", protect, getReconciliationSummary);
 router.post("/:id/reconcile", protect, reconcileBatch);
 router.get("/:id", protect, authorizeRoles("ADMIN", "MAKER"), getBatchById);
+router.get("/:id/details", protect, getBatchDetails);
 
 export default router;
