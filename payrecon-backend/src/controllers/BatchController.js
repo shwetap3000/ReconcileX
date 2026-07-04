@@ -502,3 +502,43 @@ export const getBatchDetails = async (req, res) => {
     });
   }
 };
+
+
+export const submitBatch = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const batch = await Batch.findById(id);
+
+    if (!batch) {
+      return res.status(404).json({
+        success: false,
+        message: "Batch not found",
+      });
+    }
+
+    if (batch.status !== "RECONCILED") {
+      return res.status(400).json({
+        success: false,
+        message: "Only reconciled batches can be submitted.",
+      });
+    }
+
+    batch.status = "SUBMITTED";
+    batch.submittedBy = req.user._id;
+    batch.submittedAt = new Date();
+
+    await batch.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Batch submitted for checker review successfully.",
+      batch,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
