@@ -1,1 +1,0 @@
-![alt text](tech_stack.png)
