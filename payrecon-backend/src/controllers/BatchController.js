@@ -543,7 +543,7 @@ export const submitBatch = async (req, res) => {
   }
 };
 
-// to get all the pending batches to review (for checker)
+// to get all the pending batches for review
 export const getPendingReviewBatches = async (req, res) => {
   try {
     console.log("Controller reached");
@@ -566,7 +566,7 @@ export const getPendingReviewBatches = async (req, res) => {
   }
 };
 
-//
+// to approve the submitted batch
 export const approveBatch = async (req, res) => {
   try {
     // check if batch exists
@@ -581,7 +581,7 @@ export const approveBatch = async (req, res) => {
       });
     }
 
-    // a checker should only approve batches that are submitted
+    // Only submitted batch can be approved
     if (batch.status !== "SUBMITTED") {
       return res.status(400).json({
         success: false,
@@ -604,6 +604,59 @@ export const approveBatch = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "Batch approved successfully.",
+      batch,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// to reject the sumitted batch
+export const rejectBatch = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { remarks } = req.body || {};
+
+    // check if batch exists
+    const batch = await Batch.findById(id);
+    if (!batch) {
+      return res.status(404).json({
+        success: false,
+        message: "Batch not found",
+      });
+    }
+
+    // Only submitted batches can be rejected
+    if (batch.status !== "SUBMITTED") {
+      return res.status(400).json({
+        success: false,
+        message: "Only submitted batches can be rejected.",
+      });
+    }
+
+    // if rejection reason not provided
+    if (!remarks || remarks.trim() === "") {
+      return res.status(400).json({
+        success: false,
+        message: "Rejection remarks are required.",
+      });
+    }
+
+    batch.status = "REJECTED";
+
+    batch.reviewedBy = req.user._id;
+    batch.reviewedAt = new Date();
+
+    batch.remarks = remarks;
+
+    await batch.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Batch rejected successfully.",
       batch,
     });
   } catch (error) {

@@ -11,6 +11,7 @@ import {
   submitBatch,
   getPendingReviewBatches,
   approveBatch,
+  rejectBatch,
 } from "../controllers/batchController.js";
 import { protect } from "../middleware/authMiddleware.js";
 import { authorizeRoles } from "../middleware/authorizeRoles.js";
@@ -18,9 +19,11 @@ import upload from "../middleware/uploadMiddleware.js";
 
 const router = express.Router();
 
+// Collection routes
 router.post("/", protect, authorizeRoles("MAKER", "ADMIN"), createBatch);
 router.get("/", protect, authorizeRoles("ADMIN", "MAKER"), getBatches);
 
+// Static routes
 router.get(
   "/pending-review",
   protect,
@@ -28,7 +31,7 @@ router.get(
   getPendingReviewBatches,
 );
 
-// always keep specific routes first and parameterized routes later
+// Parameterized routes
 router.post(
   "/:id/upload-ledger",
   protect,
@@ -45,11 +48,14 @@ router.post(
   uploadBankFile,
 );
 
+router.get("/:id/details", protect, getBatchDetails);
 router.get("/:id/reconciliation-summary", protect, getReconciliationSummary);
 router.post("/:id/reconcile", protect, reconcileBatch);
-router.get("/:id", protect, authorizeRoles("ADMIN", "MAKER"), getBatchById);
-router.get("/:id/details", protect, getBatchDetails);
 router.patch("/:id/submit", protect, authorizeRoles("MAKER"), submitBatch);
 router.patch("/:id/approve", protect, authorizeRoles("CHECKER"), approveBatch);
+router.patch("/:id/reject", protect, authorizeRoles("CHECKER"), rejectBatch);
+
+// Generic route (ALWAYS LAST)
+router.get("/:id", protect, authorizeRoles("ADMIN", "MAKER"), getBatchById);
 
 export default router;
