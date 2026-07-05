@@ -666,3 +666,55 @@ export const rejectBatch = async (req, res) => {
     });
   }
 };
+
+// to resubmit a rejected batch after fixing the issues
+export const resubmitBatch = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const batch = await Batch.findById(id);
+
+    if (!batch) {
+      return res.status(404).json({
+        success: false,
+        message: "Batch not found",
+      });
+    }
+
+    // Only rejected batches can be resubmitted
+    if (batch.status !== "REJECTED") {
+      return res.status(400).json({
+        success: false,
+        message: "Only rejected batches can be resubmitted.",
+      });
+    }
+
+    batch.status = "SUBMITTED";
+
+    batch.submittedBy = req.user._id;
+    batch.submittedAt = new Date();
+
+    // Reset previous review
+    batch.reviewedBy = null;
+    batch.reviewedAt = null;
+
+    batch.approvedBy = null;
+    batch.approvedAt = null;
+
+    batch.remarks = "";
+
+    await batch.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Batch resubmitted successfully.",
+      batch,
+    });
+
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
