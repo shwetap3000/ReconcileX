@@ -11,6 +11,7 @@ import validateBank from "../services/validateBank.js";
 import BankTransaction from "../models/BankTransaction.js";
 import LedgerTransaction from "../models/LedgerTransaction.js";
 import reconcileTransactions from "../services/reconcileTransactions.js";
+import createAuditLog from "../utils/auditLogger.js";
 
 // to create a new batch
 export const createBatch = async (req, res) => {
@@ -33,6 +34,18 @@ export const createBatch = async (req, res) => {
       createdBy: req.user._id,
 
       createdByName: req.user.name,
+    });
+
+    await createAuditLog({
+      action: "CREATE_BATCH",
+
+      description: `Created batch ${batch.batchId}`,
+
+      user: req.user,
+
+      batchId: batch._id,
+
+      req,
     });
 
     res.status(201).json({
@@ -216,6 +229,18 @@ export const uploadLedgerFile = async (req, res) => {
     // Delete local uploaded file
     fs.unlinkSync(req.file.path);
 
+    await createAuditLog({
+      action: "UPLOAD_LEDGER",
+
+      description: `Uploaded ledger file (${req.file.originalname}) for batch ${batch.batchId}`,
+
+      user: req.user,
+
+      batchId: batch._id,
+
+      req,
+    });
+
     return res.status(200).json({
       success: true,
       message: "Ledger uploaded successfully",
@@ -332,6 +357,18 @@ export const uploadBankFile = async (req, res) => {
       fs.unlinkSync(req.file.path);
     }
 
+    await createAuditLog({
+      action: "UPLOAD_BANK",
+
+      description: `Uploaded bank file (${req.file.originalname}) for batch ${batch.batchId}`,
+
+      user: req.user,
+
+      batchId: batch._id,
+
+      req,
+    });
+
     return res.status(200).json({
       success: true,
       message: "Bank uploaded successfully",
@@ -351,8 +388,28 @@ export const uploadBankFile = async (req, res) => {
 export const reconcileBatch = async (req, res) => {
   try {
     const batchId = req.params.id;
+    const batch = await Batch.findById(batchId);
+
+    if (!batch) {
+      return res.status(404).json({
+        success: false,
+        message: "Batch not found",
+      });
+    }
 
     const result = await reconcileTransactions(batchId);
+
+    await createAuditLog({
+      action: "START_RECONCILIATION",
+
+      description: `Started reconciliation for batch ${batch.batchId}`,
+
+      user: req.user,
+
+      batchId: batch._id,
+
+      req,
+    });
 
     return res.status(200).json({
       success: true,
@@ -530,6 +587,18 @@ export const submitBatch = async (req, res) => {
 
     await batch.save();
 
+    await createAuditLog({
+      action: "SUBMIT_BATCH",
+
+      description: `Submitted batch ${batch.batchId} for checker review`,
+
+      user: req.user,
+
+      batchId: batch._id,
+
+      req,
+    });
+
     return res.status(200).json({
       success: true,
       message: "Batch submitted for checker review successfully.",
@@ -601,6 +670,18 @@ export const approveBatch = async (req, res) => {
     // save batch
     await batch.save();
 
+    await createAuditLog({
+      action: "APPROVE_BATCH",
+
+      description: `Approved batch ${batch.batchId}`,
+
+      user: req.user,
+
+      batchId: batch._id,
+
+      req,
+    });
+
     return res.status(200).json({
       success: true,
       message: "Batch approved successfully.",
@@ -654,6 +735,18 @@ export const rejectBatch = async (req, res) => {
 
     await batch.save();
 
+    await createAuditLog({
+      action: "REJECT_BATCH",
+
+      description: `Rejected batch ${batch.batchId}. Remarks: ${remarks}`,
+
+      user: req.user,
+
+      batchId: batch._id,
+
+      req,
+    });
+
     return res.status(200).json({
       success: true,
       message: "Batch rejected successfully.",
@@ -705,12 +798,23 @@ export const resubmitBatch = async (req, res) => {
 
     await batch.save();
 
+    await createAuditLog({
+      action: "RESUBMIT_BATCH",
+
+      description: `Resubmitted batch ${batch.batchId} after corrections`,
+
+      user: req.user,
+
+      batchId: batch._id,
+
+      req,
+    });
+
     return res.status(200).json({
       success: true,
       message: "Batch resubmitted successfully.",
       batch,
     });
-
   } catch (error) {
     return res.status(500).json({
       success: false,

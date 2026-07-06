@@ -12,3 +12,4 @@
 ![Batch status updates](batch-status-updates.png)
 ![Database structure](database-structure.png)
 ![Apis built](apis-built.png)
+![Maker-Checker workflow](maker-checker-workflow.png)
