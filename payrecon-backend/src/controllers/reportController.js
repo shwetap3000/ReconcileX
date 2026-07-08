@@ -72,10 +72,7 @@ export const getReconciliationSummary = async (req, res) => {
       totalReconciled === 0
         ? 0
         : Number(
-            (
-              (report.matchedTransactions / totalReconciled) *
-              100
-            ).toFixed(2)
+            ((report.matchedTransactions / totalReconciled) * 100).toFixed(2),
           );
 
     return res.status(200).json({
@@ -102,6 +99,25 @@ export const getReconciliationSummary = async (req, res) => {
 
         overallMatchPercentage,
       },
+    });
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export const getBatchReport = async (req, res) => {
+  try {
+    const batches = await Batch.find();
+
+    return res.status(200).json({
+      success: true,
+      totalBatches: batches.length,
+      batches,
     });
   } catch (error) {
     console.error(error);
