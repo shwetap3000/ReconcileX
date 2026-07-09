@@ -112,12 +112,56 @@ export const getReconciliationSummary = async (req, res) => {
 
 export const getBatchReport = async (req, res) => {
   try {
-    const batches = await Batch.find();
+    const batches = await Batch.find()
+      .select(
+        "batchId batchName status createdByName totalLedgerTransactions totalBankTransactions matchedTransactions amountMismatchCount dateMismatchCount missingInBankCount missingInLedgerCount createdAt"
+      )
+      .sort({ createdAt: -1 });
+
+    const report = batches.map((batch) => {
+      const totalReconciled =
+        batch.matchedTransactions +
+        batch.amountMismatchCount +
+        batch.dateMismatchCount +
+        batch.missingInBankCount +
+        batch.missingInLedgerCount;
+
+      const matchPercentage =
+        totalReconciled === 0
+          ? 0
+          : Number(
+              (
+                (batch.matchedTransactions / totalReconciled) *
+                100
+              ).toFixed(2)
+            );
+
+      return {
+        batchId: batch.batchId,
+        batchName: batch.batchName,
+        status: batch.status,
+        createdBy: batch.createdByName,
+
+        totalLedgerTransactions: batch.totalLedgerTransactions,
+        totalBankTransactions: batch.totalBankTransactions,
+
+        matchedTransactions: batch.matchedTransactions,
+        amountMismatchCount: batch.amountMismatchCount,
+        dateMismatchCount: batch.dateMismatchCount,
+        missingInBankCount: batch.missingInBankCount,
+        missingInLedgerCount: batch.missingInLedgerCount,
+
+        totalReconciled,
+        matchPercentage,
+
+        createdAt: batch.createdAt,
+      };
+    });
 
     return res.status(200).json({
       success: true,
-      totalBatches: batches.length,
-      batches,
+      totalBatches: report.length,
+      batches: report,
     });
   } catch (error) {
     console.error(error);
