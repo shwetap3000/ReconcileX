@@ -5,13 +5,22 @@ import Navbar from "../components/layout/Navbar";
 
 const MainLayout = () => {
   return (
-    <div>
+    <div className="flex bg-slate-950 text-white">
+
       <Sidebar />
 
-      <div>
+      <div className="flex-1">
+
         <Navbar />
-        <Outlet />
+
+        <main className="p-8">
+
+          <Outlet />
+
+        </main>
+
       </div>
+
     </div>
   );
 };
