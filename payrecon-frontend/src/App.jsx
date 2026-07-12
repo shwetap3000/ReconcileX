@@ -4,7 +4,7 @@ import MainLayout from "./layouts/MainLayout";
 
 import Dashboard from "./pages/Dashboard";
 import Upload from "./pages/Upload";
-import Reconciliation from "./pages/Reconciliation";
+import BatchReconciliation from "./pages/BatchReconciliation";
 import Transactions from "./pages/Transactions";
 import Approvals from "./pages/Approvals";
 import Reports from "./pages/Reports";
@@ -19,7 +19,7 @@ function App() {
       <Route element={<MainLayout />}>
         <Route path="/" element={<Dashboard />} />
         <Route path="/upload" element={<Upload />} />
-        <Route path="/reconciliation" element={<Reconciliation />} />
+        <Route path="/reconciliation" element={<BatchReconciliation />} />
         <Route path="/transactions" element={<Transactions />} />
         <Route path="/approvals" element={<Approvals />} />
         <Route path="/reports" element={<Reports />} />
