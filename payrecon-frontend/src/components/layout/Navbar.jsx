@@ -54,7 +54,7 @@ const Navbar = () => {
   };
 
   return (
-    <header className="h-16 bg-slate-900 border-b border-slate-800 flex items-center justify-between px-5">
+    <header className="h-15 bg-slate-900 border-b border-slate-800 flex items-center justify-between px-5">
       {/* Left Section */}
       <div className="flex items-center gap-2">
         <button
