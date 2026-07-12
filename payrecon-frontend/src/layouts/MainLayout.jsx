@@ -6,21 +6,15 @@ import Navbar from "../components/layout/Navbar";
 const MainLayout = () => {
   return (
     <div className="flex bg-slate-950 text-white">
-
       <Sidebar />
 
-      <div className="flex-1">
-
+      <div className="ml-48 flex-1">
         <Navbar />
 
-        <main className="p-8">
-
+        <main className="pt-20 px-8 pb-8 min-h-screen bg-slate-950">
           <Outlet />
-
         </main>
-
       </div>
-
     </div>
   );
 };

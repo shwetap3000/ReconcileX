@@ -68,7 +68,7 @@ const menuItems = [
 
 const Sidebar = () => {
   return (
-    <aside className="w-48 min-h-screen bg-[#111827] border-r border-slate-800 flex flex-col">
+    <aside className="w-48 min-h-screen bg-[#111827] border-r border-slate-800 flex flex-col fixed top-0 left-0 h-screen z-50">
       {" "}
       <div className="px-5 py-4 border-b border-slate-800">
         <div className="flex items-center gap-2">
