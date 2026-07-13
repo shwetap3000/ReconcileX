@@ -1,60 +1,33 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-import DashboardLayout from "../layouts/DashboardLayout";
-import AuthLayout from "../layouts/AuthLayout";
+import MainLayout from "../components/layout/MainLayout";
 
-// import Login from "../pages/Login/Login";
-import Dashboard from "../pages/Dashboard/Dashboard";
-// import Batches from "../pages/Batches/Batches";
-// import Transactions from "../pages/Transactions/Transactions";
-// import Reconciliation from "../pages/Reconciliation/Reconciliation";
-// import Exceptions from "../pages/Exceptions/Exceptions";
-// import Reports from "../pages/Reports/Reports";
-// import AuditTrail from "../pages/AuditTrail/AuditTrail";
-// import Settings from "../pages/Settings/Settings";
-// import Integrations from "../pages/Integrations/Integrations";
-// import Users from "../pages/Users/Users";
+import Dashboard from "../pages/Dashboard";
+import Transactions from "../pages/Transactions";
+import Reconciliation from "../pages/Reconciliation";
+import UploadFiles from "../pages/UploadFiles";
+import Reports from "../pages/Reports";
+import AuditTrail from "../pages/AuditTrail";
+import Approvals from "../pages/Approvals";
+import BatchDetail from "../pages/BatchDetail";
 
-export default function AppRoutes() {
+function AppRoutes() {
   return (
     <BrowserRouter>
-
       <Routes>
-
-        {/* Auth Routes */}
-
-        {/* <Route element={<AuthLayout />}>
-          <Route path="/" element={<Login />} />
-        </Route> */}
-
-        {/* Dashboard Routes */}
-
-        <Route element={<DashboardLayout />}>
-
-          <Route path="/dashboard" element={<Dashboard />} />
-
-          {/* <Route path="/batches" element={<Batches />} />
-
+        <Route element={<MainLayout />}>
+          <Route path="/" element={<Dashboard />} />
           <Route path="/transactions" element={<Transactions />} />
-
           <Route path="/reconciliation" element={<Reconciliation />} />
-
-          <Route path="/exceptions" element={<Exceptions />} />
-
+          <Route path="/upload" element={<UploadFiles />} />
           <Route path="/reports" element={<Reports />} />
-
-          <Route path="/audit-trail" element={<AuditTrail />} />
-
-          <Route path="/settings" element={<Settings />} />
-
-          <Route path="/integrations" element={<Integrations />} />
-
-          <Route path="/users" element={<Users />} /> */}
-
+          <Route path="/audit" element={<AuditTrail />} />
+          <Route path="/approvals" element={<Approvals />} />
+          <Route path="/batch/:id" element={<BatchDetail />} />
         </Route>
-
       </Routes>
-
     </BrowserRouter>
   );
 }
+
+export default AppRoutes;
