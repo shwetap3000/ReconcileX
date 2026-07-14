@@ -5,9 +5,13 @@ import { ArrowLeft } from "lucide-react";
 
 function Sidebar() {
   return (
-    <aside className="w-64 bg-[#0B1220] border-r border-[#1F2937] flex flex-col">
+    <aside className="w-50 bg-[#0B1220] border-r border-[#1F2937] flex flex-col">
       {/* Logo */}
-      <div className="h-24 flex items-center px-8">
+      <div
+        className="h-16 mb-3 border-b
+        border-[#243041]
+       flex items-center px-4"
+      >
         <Logo />
       </div>
 
@@ -24,7 +28,7 @@ function Sidebar() {
       </div>
 
       {/* Collapse */}
-      <div className="p-5">
+      {/* <div className="p-5">
         <button
           className="
           w-full
@@ -43,7 +47,7 @@ function Sidebar() {
           <ArrowLeft size={18} />
           Collapse
         </button>
-      </div>
+      </div> */}
     </aside>
   );
 }

@@ -6,7 +6,7 @@ function Navbar() {
   return (
     <header
       className="
-        h-18
+        h-16
         px-8
         border-b
         border-[#243041]
@@ -17,9 +17,9 @@ function Navbar() {
       "
     >
       <div>
-        <h1 className="text-2xl font-bold text-white">Dashboard</h1>
+        <h1 className="text-[22px] font-bold text-white">Dashboard</h1>
 
-        <p className="text-gray-400 text-xs mt-1">
+        <p className="text-gray-400 text-xs">
           Welcome back! Here's your reconciliation overview.
         </p>
       </div>

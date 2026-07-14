@@ -23,7 +23,9 @@ function AppRoutes() {
           <Route path="/reports" element={<Reports />} />
           <Route path="/audit" element={<AuditTrail />} />
           <Route path="/approvals" element={<Approvals />} />
-          <Route path="/batch/:id" element={<BatchDetail />} />
+          {/* <Route path="/batch/:id" element={<BatchDetail />} /> */}
+          <Route path="/batches" element={<BatchDetail />} />
+
         </Route>
       </Routes>
     </BrowserRouter>

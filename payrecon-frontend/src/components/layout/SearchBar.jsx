@@ -4,7 +4,7 @@ function SearchBar() {
   return (
     <div className="relative w-90">
       <Search
-        size={16}
+        size={15}
         className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
       />
 
@@ -13,7 +13,7 @@ function SearchBar() {
         placeholder="Search transactions, batches..."
         className="
           w-full
-          h-10
+          h-9
           rounded-xl
           bg-[#141C28]
           border

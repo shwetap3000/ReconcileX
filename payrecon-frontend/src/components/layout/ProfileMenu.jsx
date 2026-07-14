@@ -18,8 +18,7 @@ function ProfileMenu() {
 
       <div>
         <h4 className="text-white font-semibold">Shweta</h4>
-
-        <p className="text-sm text-gray-400">Admin</p>
+        <p className="text-xs text-gray-400">Admin</p>
       </div>
     </div>
   );
