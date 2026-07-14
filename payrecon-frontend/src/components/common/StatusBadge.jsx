@@ -8,9 +8,7 @@ function StatusBadge({ status }) {
 
   return (
     <span
-      className={`px-3 py-1 rounded-lg text-sm font-medium ${
-        styles[status]
-      }`}
+      className={`px-3 py-1 rounded-lg text-sm font-medium ${styles[status]}`}
     >
       {status}
     </span>

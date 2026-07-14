@@ -1,0 +1,38 @@
+export const reconciliationData = [
+  {
+    id: "BTH-20260514-001",
+    name: "HDFC Settlement",
+    created: "14 May 2026",
+    transactions: 1254,
+    matched: 1240,
+    exceptions: 14,
+    status: "Completed",
+  },
+  {
+    id: "BTH-20260514-002",
+    name: "ICICI Settlement",
+    created: "14 May 2026",
+    transactions: 986,
+    matched: 742,
+    exceptions: 244,
+    status: "Processing",
+  },
+  {
+    id: "BTH-20260513-003",
+    name: "Axis Settlement",
+    created: "13 May 2026",
+    transactions: 756,
+    matched: 0,
+    exceptions: 756,
+    status: "Pending",
+  },
+  {
+    id: "BTH-20260513-004",
+    name: "Razorpay Settlement",
+    created: "13 May 2026",
+    transactions: 1842,
+    matched: 1801,
+    exceptions: 41,
+    status: "Failed",
+  },
+];

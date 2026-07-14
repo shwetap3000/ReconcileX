@@ -1,4 +1,4 @@
-import Table from "../common/table/Table";
+import Table from "../common/table/DataTable";
 import { recentBatches } from "../../constants/recentBatches";
 
 const columns = [

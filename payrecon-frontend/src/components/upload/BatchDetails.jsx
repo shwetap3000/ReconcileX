@@ -3,18 +3,13 @@ import { CalendarDays } from "lucide-react";
 function BatchDetails() {
   return (
     <>
-      <h2 className="text-2xl font-semibold text-white mb-8">
-        Batch Details
-      </h2>
+      <h2 className="text-2xl font-semibold text-white mb-8">Batch Details</h2>
 
       <div className="grid grid-cols-3 gap-6">
-
         {/* Batch Name */}
 
         <div>
-          <label className="block text-sm text-gray-300 mb-2">
-            Batch Name
-          </label>
+          <label className="block text-sm text-gray-300 mb-2">Batch Name</label>
 
           <input
             type="text"
@@ -38,9 +33,7 @@ function BatchDetails() {
         <div>
           <label className="block text-sm text-gray-300 mb-2">
             Description
-            <span className="text-gray-500 ml-1">
-              (Optional)
-            </span>
+            <span className="text-gray-500 ml-1">(Optional)</span>
           </label>
 
           <textarea
@@ -69,7 +62,6 @@ function BatchDetails() {
           </label>
 
           <div className="relative">
-
             <input
               type="text"
               value="May 14, 2025"
@@ -96,11 +88,8 @@ function BatchDetails() {
                 text-gray-400
               "
             />
-
           </div>
-
         </div>
-
       </div>
 
       {/* Divider */}

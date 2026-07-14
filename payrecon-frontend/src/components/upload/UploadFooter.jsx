@@ -3,7 +3,6 @@ import { ShieldCheck, Play } from "lucide-react";
 function UploadFooter() {
   return (
     <div className="mt-8 flex justify-end gap-4">
-
       <button
         className="
         h-11
@@ -32,7 +31,6 @@ function UploadFooter() {
         transition"
       >
         <ShieldCheck size={18} />
-
         Validate Files
       </button>
 
@@ -49,10 +47,8 @@ function UploadFooter() {
         transition"
       >
         <Play size={18} />
-
         Start Reconciliation
       </button>
-
     </div>
   );
 }

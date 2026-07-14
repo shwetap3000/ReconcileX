@@ -6,7 +6,6 @@ import { ArrowLeft } from "lucide-react";
 function Sidebar() {
   return (
     <aside className="w-64 bg-[#0B1220] border-r border-[#1F2937] flex flex-col">
-
       {/* Logo */}
       <div className="h-24 flex items-center px-8">
         <Logo />
@@ -14,7 +13,6 @@ function Sidebar() {
 
       {/* Navigation */}
       <div className="flex-1 px-4 space-y-2">
-
         {navigation.map((item) => (
           <NavItem
             key={item.path}
@@ -23,12 +21,10 @@ function Sidebar() {
             path={item.path}
           />
         ))}
-
       </div>
 
       {/* Collapse */}
       <div className="p-5">
-
         <button
           className="
           w-full
@@ -45,13 +41,9 @@ function Sidebar() {
           transition"
         >
           <ArrowLeft size={18} />
-
           Collapse
-
         </button>
-
       </div>
-
     </aside>
   );
 }

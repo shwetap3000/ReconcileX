@@ -1,9 +1,20 @@
-import React from 'react'
+import ReconciliationHeader from "../components/reconciliation/ReconciliationHeader";
+import ReconciliationToolbar from "../components/reconciliation/ReconciliationToolbar";
+import ReconciliationStats from "../components/reconciliation/ReconciliationStats";
+import ReconciliationTable from "../components/reconciliation/ReconciliationTable";
 
-const Reconciliation = () => {
+function Reconciliation() {
   return (
-    <div>Reconciliation</div>
-  )
+    <div className="space-y-6">
+      <ReconciliationHeader />
+
+      <ReconciliationToolbar />
+
+      <ReconciliationStats />
+
+      <ReconciliationTable />
+    </div>
+  );
 }
 
-export default Reconciliation
+export default Reconciliation;

@@ -1,7 +1,7 @@
 import WelcomeSection from "../components/dashboard/WelcomeSection";
 import StatsGrid from "../components/dashboard/StatsGrid";
 import ChartsSection from "../components/dashboard/ChartsSection";
-import RecentBatches from "../components/dashboard/RecentBatches";
+import RecentBatchesTable from "../components/dashboard/RecentBatchesTable";
 import RecentActivity from "../components/dashboard/RecentActivity";
 
 function Dashboard() {
@@ -14,15 +14,13 @@ function Dashboard() {
       <ChartsSection />
 
       <section className="grid grid-cols-3 gap-6">
-
         <div className="col-span-2">
-          <RecentBatches />
+          <RecentBatchesTable />
         </div>
 
         <div>
           <RecentActivity />
         </div>
-
       </section>
     </>
   );

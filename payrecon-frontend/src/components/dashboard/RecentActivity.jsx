@@ -1,9 +1,4 @@
-import {
-  Upload,
-  CircleCheckBig,
-  LoaderCircle,
-  CircleX,
-} from "lucide-react";
+import { Upload, CircleCheckBig, LoaderCircle, CircleX } from "lucide-react";
 
 import { recentActivity } from "../../constants/recentActivity";
 
@@ -24,23 +19,15 @@ const colors = {
 function RecentActivity() {
   return (
     <div className="bg-[#141C28] border border-[#243041] rounded-2xl p-6 h-full">
-
-      <h2 className="text-xl font-semibold mb-6">
-        Recent Activity
-      </h2>
+      <h2 className="text-xl font-semibold mb-6">Recent Activity</h2>
 
       <div className="space-y-5">
-
         {recentActivity.map((item) => {
           const Icon = icons[item.type];
 
           return (
-            <div
-              key={item.id}
-              className="flex justify-between items-start"
-            >
+            <div key={item.id} className="flex justify-between items-start">
               <div className="flex gap-4">
-
                 <div
                   className={`w-10 h-10 rounded-full flex items-center justify-center ${colors[item.type]}`}
                 >
@@ -48,30 +35,21 @@ function RecentActivity() {
                 </div>
 
                 <div>
-                  <p className="text-white">
-                    {item.title}
-                  </p>
+                  <p className="text-white">{item.title}</p>
 
-                  <p className="text-sm text-gray-400 mt-1">
-                    {item.batch}
-                  </p>
+                  <p className="text-sm text-gray-400 mt-1">{item.batch}</p>
                 </div>
-
               </div>
 
-              <span className="text-sm text-gray-500">
-                {item.time}
-              </span>
+              <span className="text-sm text-gray-500">{item.time}</span>
             </div>
           );
         })}
-
       </div>
 
       <button className="w-full mt-8 text-blue-400 hover:text-blue-300">
         View all activity →
       </button>
-
     </div>
   );
 }

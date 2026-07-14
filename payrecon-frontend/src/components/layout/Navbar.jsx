@@ -17,9 +17,7 @@ function Navbar() {
       "
     >
       <div>
-        <h1 className="text-2xl font-bold text-white">
-          Dashboard
-        </h1>
+        <h1 className="text-2xl font-bold text-white">Dashboard</h1>
 
         <p className="text-gray-400 text-xs mt-1">
           Welcome back! Here's your reconciliation overview.

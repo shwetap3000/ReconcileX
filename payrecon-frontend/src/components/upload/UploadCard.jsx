@@ -1,10 +1,6 @@
 import { FileSpreadsheet } from "lucide-react";
 
-function UploadCard({
-  title,
-  subtitle,
-  buttonText = "Browse Files",
-}) {
+function UploadCard({ title, subtitle, buttonText = "Browse Files" }) {
   return (
     <div
       className="
@@ -27,23 +23,16 @@ function UploadCard({
       {/* Icon */}
 
       <div className="w-20 h-20 rounded-full bg-green-500/10 flex items-center justify-center">
-        <FileSpreadsheet
-          size={42}
-          className="text-green-500"
-        />
+        <FileSpreadsheet size={42} className="text-green-500" />
       </div>
 
       {/* Title */}
 
-      <h3 className="mt-6 text-2xl font-semibold text-white">
-        {title}
-      </h3>
+      <h3 className="mt-6 text-2xl font-semibold text-white">{title}</h3>
 
       {/* Subtitle */}
 
-      <p className="mt-2 text-gray-400">
-        {subtitle}
-      </p>
+      <p className="mt-2 text-gray-400">{subtitle}</p>
 
       {/* Browse Button */}
 
@@ -67,7 +56,6 @@ function UploadCard({
 
       <div className="mt-6 flex items-center gap-2 text-sm text-gray-400">
         <div className="w-2 h-2 rounded-full bg-green-500" />
-
         Supported format: CSV (.csv)
       </div>
     </div>

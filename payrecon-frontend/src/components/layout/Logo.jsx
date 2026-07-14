@@ -10,9 +10,7 @@ function Logo() {
           ReconcileX
         </h2>
 
-        <p className="text-xs text-gray-500 mt-1">
-          Payment Reconciliation
-        </p>
+        <p className="text-xs text-gray-500 mt-1">Payment Reconciliation</p>
       </div>
     </div>
   );
