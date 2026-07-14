@@ -1,9 +1,7 @@
-import React from 'react'
+import UploadContainer from "../components/upload/UploadContainer";
 
-const UploadFiles = () => {
-  return (
-    <div>UploadFiles</div>
-  )
+function UploadFiles() {
+  return <UploadContainer />;
 }
 
-export default UploadFiles
+export default UploadFiles;
