@@ -1,9 +1,31 @@
-import React from 'react'
+import WelcomeSection from "../components/dashboard/WelcomeSection";
+import StatsGrid from "../components/dashboard/StatsGrid";
+import ChartsSection from "../components/dashboard/ChartsSection";
+import RecentBatches from "../components/dashboard/RecentBatches";
+import RecentActivity from "../components/dashboard/RecentActivity";
 
-const Dashboard = () => {
+function Dashboard() {
   return (
-    <div>Dashboard</div>
-  )
+    <>
+      <WelcomeSection />
+
+      <StatsGrid />
+
+      <ChartsSection />
+
+      <section className="grid grid-cols-3 gap-6">
+
+        <div className="col-span-2">
+          <RecentBatches />
+        </div>
+
+        <div>
+          <RecentActivity />
+        </div>
+
+      </section>
+    </>
+  );
 }
 
-export default Dashboard
+export default Dashboard;
