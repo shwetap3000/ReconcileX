@@ -1,9 +1,17 @@
-import React from 'react'
+import BatchHeader from "../components/batchDetail/BatchHeader";
+import BatchStats from "../components/batchDetail/BatchStats";
+import MatchingCharts from "../components/batchDetail/MatchingCharts";
+import TransactionTable from "../components/batchDetail/TransactionTable";
 
-const BatchDetail = () => {
+function BatchDetail() {
   return (
-    <div>BatchDetail</div>
-  )
+    <div className="space-y-6">
+      <BatchHeader />
+      <BatchStats />
+      <MatchingCharts />
+      <TransactionTable />
+    </div>
+  );
 }
 
-export default BatchDetail
+export default BatchDetail;
