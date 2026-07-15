@@ -7,7 +7,7 @@ import RecentActivity from "../components/dashboard/RecentActivity";
 function Dashboard() {
   return (
     <>
-      <WelcomeSection />
+      {/* <WelcomeSection /> */}
 
       <StatsGrid />
 
