@@ -1,6 +1,6 @@
 import BatchHeader from "../components/batchDetail/BatchHeader";
 import BatchStats from "../components/batchDetail/BatchStats";
-import MatchingCharts from "../components/batchDetail/MatchingCharts";
+import ChartsSection from "../components/batchDetail/ChartsSection";
 import TransactionTable from "../components/batchDetail/TransactionTable";
 
 function BatchDetail() {
@@ -8,7 +8,7 @@ function BatchDetail() {
     <div className="space-y-6">
       <BatchHeader />
       <BatchStats />
-      <MatchingCharts />
+      <ChartsSection />
       <TransactionTable />
     </div>
   );
