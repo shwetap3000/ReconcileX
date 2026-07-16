@@ -7,7 +7,7 @@ function MainLayout() {
     <div className="flex h-screen bg-[#090D14]">
       <Sidebar />
 
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto custom-scrollbar">
         <Navbar />
         <main className="p-4">
           <Outlet />

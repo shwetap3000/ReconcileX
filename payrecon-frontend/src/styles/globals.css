@@ -8,3 +8,29 @@ body {
   background: var(--background);
   color: white;
 }
+
+/* Only affects elements with class="custom-scrollbar" */
+
+.custom-scrollbar {
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: #243041 #090D14;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #090D14;
+  border-radius: 9999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #243041;
+  border-radius: 9999px;
+  border: 2px solid #090D14;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #3A4A63;
+}
