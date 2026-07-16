@@ -5,10 +5,10 @@ import { ArrowLeft } from "lucide-react";
 
 function Sidebar() {
   return (
-    <aside className="w-50 bg-[#0B1220] border-r border-[#1F2937] flex flex-col">
+    <aside className="w-55 bg-[#0B1220] border-r border-[#1F2937] flex flex-col">
       {/* Logo */}
       <div
-        className="h-16 mb-3 border-b
+        className="h-20 mb-3 border-b
         border-[#243041]
        flex items-center px-4"
       >
@@ -16,7 +16,7 @@ function Sidebar() {
       </div>
 
       {/* Navigation */}
-      <div className="flex-1 px-4 space-y-2">
+      <div className="flex-1 px-4 space-y-3">
         {navigation.map((item) => (
           <NavItem
             key={item.path}
@@ -26,28 +26,6 @@ function Sidebar() {
           />
         ))}
       </div>
-
-      {/* Collapse */}
-      {/* <div className="p-5">
-        <button
-          className="
-          w-full
-          h-12
-          rounded-xl
-          border
-          border-[#243041]
-          flex
-          items-center
-          justify-center
-          gap-2
-          text-gray-400
-          hover:bg-[#111827]
-          transition"
-        >
-          <ArrowLeft size={18} />
-          Collapse
-        </button>
-      </div> */}
     </aside>
   );
 }

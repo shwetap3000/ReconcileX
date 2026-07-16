@@ -4,7 +4,7 @@ function StatCard({ title, value, change, icon: Icon, iconBg, changeColor }) {
       <div className="flex items-start gap-4">
         {/* Icon */}
         <div
-          className={`w-10 h-10 rounded-xl ${iconBg} flex items-center justify-center shrink-0`}
+          className={`w-9 h-9 rounded-xl ${iconBg} flex items-center justify-center shrink-0`}
         >
           <Icon className="text-white" size={22} />
         </div>
@@ -12,10 +12,8 @@ function StatCard({ title, value, change, icon: Icon, iconBg, changeColor }) {
         {/* Text */}
         <div>
           <p className="text-sm font-bold text-gray-400">{title}</p>
-
-          <h2 className="text-2xl font-bold text-white mt-1">{value}</h2>
-
-          <p className={`text-sm mt-2 ${changeColor}`}>{change}</p>
+          <h2 className="text-xl font-bold text-white mt-1">{value}</h2>
+          <p className={`text-sm mt-3 ${changeColor}`}>{change}</p>
         </div>
       </div>
     </div>

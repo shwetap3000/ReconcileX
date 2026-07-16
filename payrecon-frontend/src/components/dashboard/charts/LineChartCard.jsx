@@ -10,15 +10,16 @@ import {
 } from "recharts";
 
 import { trendData } from "../../../constants/chart";
+import CustomTooltip from "./CustomTooltip";
 
 function LineChartCard() {
   return (
-    <div className="bg-[#141C28] border border-[#243041] rounded-2xl p-4 h-[350px] w-full">
+    <div className="bg-[#141C28] border border-[#243041] rounded-2xl p-3 h-[340px] w-full">
       <div className="flex justify-between items-center mb-5">
-        <h2 className="text-xl font-semibold mb-2">Reconciliation Trend</h2>
+        <h2 className="text-xl font-semibold mb-2 ml-2">Reconciliation Trend</h2>
       </div>
 
-      <ResponsiveContainer width="100%" height="85%">
+      <ResponsiveContainer width="100%" height="80%">
         {/* Use ComposedChart so we can combine Area + Line */}
         <ComposedChart data={trendData}>
           {/* Define the blue gradient */}
@@ -56,7 +57,14 @@ function LineChartCard() {
           />
 
           {/* Tooltip on hover */}
-          <Tooltip />
+<Tooltip
+  content={<CustomTooltip />}
+  cursor={{
+    stroke: "#94A3B8",
+    strokeWidth: 1,
+    strokeDasharray: "4 4",
+  }}
+/>
 
           {/* Blue area under the line */}
           <Area

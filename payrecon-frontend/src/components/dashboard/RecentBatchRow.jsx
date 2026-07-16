@@ -10,18 +10,18 @@ function RecentBatchRow({ batch }) {
   return (
     <tr className="border-b border-[#243041] hover:bg-[#182233] transition-colors">
       {/* Batch ID */}
-      <td className="px-6 py-5 text-gray-300 font-medium">{batch.id}</td>
+      <td className="px-3 py-4 text-gray-300 text-[14px]">{batch.id}</td>
 
       {/* Created Date */}
-      <td className="px-6 py-5 text-gray-400">{batch.date}</td>
+      <td className="px-4 py-4 text-gray-400">{batch.date}</td>
 
       {/* Transactions */}
-      <td className="px-6 py-5 text-gray-300">{batch.transactions}</td>
+      <td className="px-6 py-4 text-gray-300">{batch.transactions}</td>
 
       {/* Status */}
-      <td className="px-6 py-5">
+      <td className="px-6 py-4">
         <span
-          className={`px-3 py-1 rounded-lg text-sm font-medium ${
+          className={`px-3 py-1 rounded-lg text-xs font-medium ${
             statusStyles[batch.status]
           }`}
         >
@@ -34,7 +34,7 @@ function RecentBatchRow({ batch }) {
         <div className="flex items-center gap-3">
           <span className="text-sm text-gray-300 w-10">{batch.progress}%</span>
 
-          <div className="w-28 h-2 bg-[#243041] rounded-full overflow-hidden">
+          <div className="w-25 h-2 bg-[#243041] rounded-full overflow-hidden">
             <div
               className={`h-full rounded-full ${
                 batch.status === "Completed"
@@ -51,7 +51,7 @@ function RecentBatchRow({ batch }) {
 
       {/* Action */}
       <td className="px-6 py-5">
-        <button className="w-10 h-10 flex items-center justify-center rounded-lg border border-[#243041] hover:bg-[#1B2535] transition">
+        <button className="w-8 h-8 ml-3 flex items-center justify-center rounded-lg border border-[#243041] hover:bg-[#1B2535] transition">
           <MoreHorizontal size={18} className="text-gray-400" />
         </button>
       </td>

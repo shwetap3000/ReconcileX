@@ -3,7 +3,7 @@ import StatCard from "./StatCard";
 
 function StatsGrid() {
   return (
-    <section className="grid grid-cols-4 gap-3 mb-4">
+    <section className="grid grid-cols-4 gap-3 mb-3">
       {stats.map((item) => (
         <StatCard
           key={item.id}

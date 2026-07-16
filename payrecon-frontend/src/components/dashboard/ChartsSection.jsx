@@ -3,7 +3,7 @@ import DonutChartCard from "./charts/DonutChartCard";
 
 function ChartsSection() {
   return (
-    <section className="grid grid-cols-[60%_39%] gap-3 mb-4">
+    <section className="grid grid-cols-[55%_44%] gap-3 mb-3">
       <LineChartCard />
 
       <DonutChartCard />

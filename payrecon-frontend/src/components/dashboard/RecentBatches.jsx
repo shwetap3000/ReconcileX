@@ -30,7 +30,7 @@ const columns = [
 
 function RecentBatches() {
   return (
-    <div className="bg-[#141C28] border border-[#243041] rounded-2xl p-6">
+    <div className="bg-[#141C28] border border-[#243041] rounded-2xl p-5">
 
       <div className="flex items-center justify-between mb-6">
 

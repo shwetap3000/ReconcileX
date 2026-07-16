@@ -1,6 +1,6 @@
 import { Upload, CircleCheckBig, LoaderCircle, CircleX } from "lucide-react";
-
 import { recentActivity } from "../../constants/recentActivity";
+import { Link } from "react-router-dom";
 
 const icons = {
   upload: Upload,
@@ -18,8 +18,8 @@ const colors = {
 
 function RecentActivity() {
   return (
-    <div className="bg-[#141C28] border border-[#243041] rounded-2xl p-6 h-full">
-      <h2 className="text-xl font-semibold mb-6">Recent Activity</h2>
+    <div className="bg-[#141C28] border border-[#243041] rounded-2xl p-3 pl-4 h-full">
+      <h2 className="text-xl font-semibold mb-8">Recent Activity</h2>
 
       <div className="space-y-5">
         {recentActivity.map((item) => {
@@ -47,9 +47,14 @@ function RecentActivity() {
         })}
       </div>
 
-      <button className="w-full mt-8 text-blue-400 hover:text-blue-300">
+      <div className="mt-10 ml-25">
+        <Link
+        to="/audit"
+        className="w-full text-blue-400 hover:text-blue-300"
+      >
         View all activity →
-      </button>
+      </Link>
+      </div>
     </div>
   );
 }

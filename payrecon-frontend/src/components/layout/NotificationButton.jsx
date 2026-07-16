@@ -17,7 +17,7 @@ function NotificationButton() {
         hover:bg-[#1C2637]
       "
     >
-      <Bell size={16} className="text-gray-300" />
+      <Bell size={17} className="text-gray-300" />
 
       <span
         className="

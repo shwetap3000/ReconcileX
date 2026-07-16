@@ -5,7 +5,7 @@ function NavItem({ icon: Icon, title, path }) {
     <NavLink
       to={path}
       className={({ isActive }) =>
-        `flex items-center gap-2 h-11 rounded-l-xl rounded-r-xl px-2 text-[14px] font-medium transition-all duration-200
+        `flex items-center gap-2 h-11 rounded-l-xl rounded-r-xl px-2 text-[15px] font-medium transition-all duration-200
         ${
           isActive
             ? "bg-blue-600/20 text-white border-l-3 border-blue-500"
