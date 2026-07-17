@@ -1,10 +1,11 @@
-import SearchBar from "./SearchBar";
 import NotificationButton from "./NotificationButton";
 import ProfileMenu from "./ProfileMenu";
-import DateRangeDropdown from "../common/DaysDropdown";
-import CustomDateButton from "../common/CustomDateButton";
 
-function Navbar() {
+function Navbar({
+  title,
+  subtitle,
+  actions
+}) {
   return (
     <header
       className="
@@ -15,18 +16,17 @@ function Navbar() {
         flex
         items-center
         justify-between
+        mb-3
       "
     >
       <div>
-        <h1 className="text-[22px] font-bold text-white">Dashboard</h1>
+        <h1 className="text-[22px] font-bold text-white">{title}</h1>
 
-        <p className="text-gray-400 text-sm">Reconciliation overview.</p>
+        <p className="text-gray-400 text-sm">{subtitle}</p>
       </div>
 
-      <div className="flex items-center gap-3">
-        <DateRangeDropdown />
-        <CustomDateButton />
-        <SearchBar />
+      <div className="flex items-center gap-4">
+        {actions}
         <NotificationButton />
         <ProfileMenu />
       </div>

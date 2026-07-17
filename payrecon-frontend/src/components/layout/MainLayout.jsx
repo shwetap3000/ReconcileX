@@ -8,8 +8,7 @@ function MainLayout() {
       <Sidebar />
 
       <div className="flex-1 overflow-y-auto custom-scrollbar">
-        <Navbar />
-        <main className="p-4">
+        <main className="p-3 pt-0">
           <Outlet />
         </main>
       </div>

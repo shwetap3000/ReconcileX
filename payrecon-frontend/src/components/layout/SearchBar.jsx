@@ -2,10 +2,10 @@ import { Search } from "lucide-react";
 
 function SearchBar() {
   return (
-    <div className="relative w-67">
+    <div className="relative w-63">
       <Search
         size={15}
-        className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+        className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
       />
 
       <input
@@ -18,7 +18,7 @@ function SearchBar() {
           bg-[#141C28]
           border
           border-[#243041]
-          pl-10
+          pl-8
           pr-4
           text-white
           placeholder:text-gray-500

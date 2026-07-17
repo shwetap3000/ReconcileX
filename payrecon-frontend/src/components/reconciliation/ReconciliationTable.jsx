@@ -1,5 +1,6 @@
 import ReconciliationRow from "./ReconciliationRow";
 import { reconciliationData } from "../../constants/reconciliationBatch";
+import ReconciliationToolbar from "./ReconciliationToolbar";
 
 function ReconciliationTable() {
   return (
@@ -12,6 +13,8 @@ function ReconciliationTable() {
             Manage all reconciliation batches
           </p>
         </div>
+
+        <ReconciliationToolbar />
       </div>
 
       <div className="overflow-x-auto">

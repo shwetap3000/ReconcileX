@@ -6,29 +6,6 @@ function ReconciliationToolbar() {
       <div className="flex gap-4">
         {/* Search */}
 
-        <div className="relative">
-          <Search
-            size={18}
-            className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
-          />
-
-          <input
-            placeholder="Search by batch ID or name..."
-            className="
-              w-[340px]
-              h-12
-              bg-[#141C28]
-              border
-              border-[#243041]
-              rounded-xl
-              pl-11
-              pr-4
-              outline-none
-              focus:border-[#4F6BFF]
-            "
-          />
-        </div>
-
         {/* Status */}
 
         <button
@@ -52,8 +29,9 @@ function ReconciliationToolbar() {
 
       {/* New Batch */}
 
-      <button
-        className="
+      <div className="relative">
+        <button
+          className="
           h-12
           px-6
           rounded-xl
@@ -63,10 +41,11 @@ function ReconciliationToolbar() {
           gap-2
           hover:bg-[#3F5AF5]
         "
-      >
-        <Plus size={18} />
-        New Batch
-      </button>
+        >
+          <Plus size={18} />
+          New Batch
+        </button>
+      </div>
     </div>
   );
 }

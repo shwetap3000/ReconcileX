@@ -1,23 +1,34 @@
 import PageContainer from "../components/common/PageContainer";
-import PageHeader from "../components/common/PageHeader";
 import TransactionStats from "../components/transactions/TransactionStats";
 import TransactionFilters from "../components/transactions/TransactionFilters";
 import TransactionTable from "../components/transactions/TransactionTable";
+import Navbar from "../components/layout/Navbar";
+import DateRangeDropdown from "../components/common/DaysDropdown";
+import CustomDateButton from "../components/common/CustomDateButton";
+import SearchBar from "../components/layout/SearchBar";
 
 function Transactions() {
   return (
-    <PageContainer>
-      <PageHeader
+    <>
+      <Navbar
         title="Transactions"
-        subtitle="View and explore all transactions across all batches."
+        subtitle="Transaction records and reconciliation status. "
+        actions={
+          <>
+            <DateRangeDropdown />
+            <CustomDateButton />
+            <SearchBar />
+          </>
+        }
       />
+      <PageContainer>
+        <TransactionStats />
 
-      <TransactionStats />
+        <TransactionFilters />
 
-      <TransactionFilters />
-
-      <TransactionTable />
-    </PageContainer>
+        <TransactionTable />
+      </PageContainer>
+    </>
   );
 }
 
