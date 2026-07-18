@@ -3,15 +3,12 @@ import { Search, Filter, Plus, ChevronDown } from "lucide-react";
 function ReconciliationToolbar() {
   return (
     <div className="flex justify-between items-center">
-      <div className="flex gap-4">
-        {/* Search */}
-
-        {/* Status */}
-
+      <div className="flex gap-3">
         <button
           className="
-            h-12
-            px-5
+            h-11
+            mr-2
+            px-3
             rounded-xl
             bg-[#141C28]
             border
@@ -21,7 +18,7 @@ function ReconciliationToolbar() {
             gap-2
           "
         >
-          <Filter size={17} />
+          <Filter size={16} />
           All Status
           <ChevronDown size={16} />
         </button>
@@ -32,8 +29,8 @@ function ReconciliationToolbar() {
       <div className="relative">
         <button
           className="
-          h-12
-          px-6
+          h-11
+          px-3
           rounded-xl
           bg-[#4F6BFF]
           flex

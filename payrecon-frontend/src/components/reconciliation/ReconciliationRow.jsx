@@ -13,21 +13,21 @@ function ReconciliationRow({ batch }) {
 
   return (
     <tr className="border-b border-[#243041] hover:bg-[#182233] transition">
-      <td className="px-6 py-5 font-medium">{batch.id}</td>
+      <td className="px-6 py-2 font">{batch.id}</td>
 
-      <td className="px-6 py-5">{batch.name}</td>
+      <td className="px-6 py-2">{batch.name}</td>
 
-      <td className="px-6 py-5 text-gray-400">{batch.created}</td>
+      <td className="px-6 py-2 text-gray-400">{batch.created}</td>
 
-      <td className="px-6 py-5">{batch.transactions.toLocaleString()}</td>
+      <td className="px-6 py-2">{batch.transactions.toLocaleString()}</td>
 
-      <td className="px-6 py-5 text-green-400">
+      <td className="px-6 py-2 text-green-400">
         {batch.matched.toLocaleString()}
       </td>
 
-      <td className="px-6 py-5 text-red-400">{batch.exceptions}</td>
+      <td className="px-6 py-2 text-red-400">{batch.exceptions}</td>
 
-      <td className="px-6 py-5">
+      <td className="px-6 py-2">
         <span
           className={`px-3 py-1 rounded-lg text-sm font-medium ${statusStyles[batch.status]}`}
         >
@@ -35,7 +35,7 @@ function ReconciliationRow({ batch }) {
         </span>
       </td>
 
-      <td className="px-6 py-5 text-center">
+      <td className="px-6 py-2 text-center">
         <button className="w-10 h-10 rounded-lg border border-[#243041] flex items-center justify-center hover:bg-[#1B2535]">
           <MoreHorizontal size={18} />
         </button>

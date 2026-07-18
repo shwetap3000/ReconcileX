@@ -5,7 +5,7 @@ import ReconciliationToolbar from "./ReconciliationToolbar";
 function ReconciliationTable() {
   return (
     <div className="bg-[#141C28] border border-[#243041] rounded-2xl overflow-hidden">
-      <div className="flex justify-between items-center px-6 py-5 border-b border-[#243041]">
+      <div className="flex justify-between items-center px-6 py-4 border-b border-[#243041]">
         <div>
           <h2 className="text-xl font-semibold">Reconciliation Batches</h2>
 
