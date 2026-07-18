@@ -20,14 +20,14 @@ const data = [
 
 function MatchingStatusChart() {
   return (
-    <div className="bg-[#141C28] border border-[#243041] rounded-2xl p-6">
-      <h2 className="text-xl font-semibold mb-8">Matching Status</h2>
+    <div className="bg-[#141C28] border border-[#243041] rounded-2xl pt-4 p-6 h-80">
+      <h2 className="text-xl font-semibold mb-7">Matching Status</h2>
 
       <div className="flex items-center justify-between">
         {/* Donut */}
 
         <div className="relative">
-          <PieChart width={230} height={230}>
+          <PieChart width={200} height={200}>
             <Pie data={data} innerRadius={65} outerRadius={95} dataKey="value">
               {data.map((item) => (
                 <Cell key={item.name} fill={item.color} />
@@ -44,11 +44,11 @@ function MatchingStatusChart() {
 
         {/* Legend */}
 
-        <div className="space-y-6">
+        <div className="space-y-4">
           {data.map((item) => (
             <div
               key={item.name}
-              className="flex items-center justify-between gap-8"
+              className="flex items-center justify-between gap-5"
             >
               <div className="flex items-center gap-3">
                 <div

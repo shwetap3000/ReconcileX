@@ -10,24 +10,21 @@ function TransactionTable() {
     <div className="bg-[#141C28] border border-[#243041] rounded-2xl overflow-hidden">
       {/* Header */}
 
-      <div className="flex justify-between items-center px-6 py-5 border-b border-[#243041]">
+      <div className="flex justify-between items-center px-6 py-1 border-b border-[#243041]">
         <div>
           <h2 className="text-xl font-semibold text-white">Transactions</h2>
 
-          <p className="text-sm text-gray-400 mt-1">
+          <p className="text-sm text-gray-400">
             View all reconciled transactions
           </p>
         </div>
-      </div>
 
-      {/* Toolbar */}
-
-      <div className="flex justify-between items-center px-6 py-5 border-b border-[#243041]">
+         <div className="flex justify-between items-center px-6 py-4 gap-3 border-[#243041]">
         {/* Search */}
 
         <div className="relative">
           <Search
-            size={18}
+            size={16}
             className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
           />
 
@@ -36,7 +33,7 @@ function TransactionTable() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="
-              w-80
+              w-70
               h-11
               rounded-xl
               bg-[#111827]
@@ -59,17 +56,21 @@ function TransactionTable() {
             gap-2
             border
             border-[#243041]
+            bg-[#111827]
             rounded-xl
             px-5
             h-11
             hover:bg-[#1A2332]
           "
         >
-          <Filter size={18} />
+          <Filter size={16} />
           Filter
         </button>
       </div>
 
+      </div>
+
+     
       {/* Table */}
 
       <div className="overflow-x-auto">
@@ -112,14 +113,14 @@ function TransactionTable() {
                   key={txn.id}
                   className="border-b border-[#243041] hover:bg-[#182233]"
                 >
-                  <td className="px-6 py-5 font-medium">{txn.id}</td>
+                  <td className="px-6 py-3 font-medium">{txn.id}</td>
 
-                  <td className="px-6 py-5">{txn.ledger}</td>
+                  <td className="px-6 py-3">{txn.ledger}</td>
 
-                  <td className="px-6 py-5">{txn.bank}</td>
+                  <td className="px-6 py-3">{txn.bank}</td>
 
                   <td
-                    className={`px-6 py-5 ${
+                    className={`px-6 py-3 ${
                       txn.difference === "₹0"
                         ? "text-green-400"
                         : "text-red-400"
@@ -128,7 +129,7 @@ function TransactionTable() {
                     {txn.difference}
                   </td>
 
-                  <td className="px-6 py-5">
+                  <td className="px-6 py-3">
                     <span
                       className={`px-3 py-1 rounded-lg text-sm font-medium ${
                         txn.status === "Matched"
@@ -142,7 +143,7 @@ function TransactionTable() {
                     </span>
                   </td>
 
-                  <td className="px-6 py-5">
+                  <td className="px-6 py-3">
                     <div className="flex justify-center gap-2">
                       <button
                         className="

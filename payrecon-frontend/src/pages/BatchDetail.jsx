@@ -6,7 +6,7 @@ import Navbar from "../components/layout/Navbar";
 
 function BatchDetail() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <Navbar
       title="May Reconciliation Batch 1"
       subtitle="Batch summary and reconciliation status."

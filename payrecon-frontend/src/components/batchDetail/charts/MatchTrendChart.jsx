@@ -20,22 +20,17 @@ const data = [
 
 function MatchTrendChart() {
   return (
-    <div className="bg-[#141C28] border border-[#243041] rounded-2xl p-6 h-full">
+    <div className="bg-[#141C28] border border-[#243041] rounded-2xl p-0 pr-5 pt-4 h-80">
       {/* Header */}
 
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-semibold">Match Trend</h2>
-
-        <button className="flex items-center gap-2 px-4 py-2 rounded-lg border border-[#243041] bg-[#111827] hover:bg-[#182233] text-sm">
-          Last 7 Days
-          <ChevronDown size={16} />
-        </button>
+        <h2 className="text-xl font-semibold pl-6">Match Trend</h2>
       </div>
 
       {/* Chart */}
 
-      <div className="h-72">
-        <ResponsiveContainer width="100%" height="100%">
+      <div className="h-75">
+        <ResponsiveContainer width="100%" height="80%">
           <AreaChart data={data}>
             <defs>
               <linearGradient id="matchGradient" x1="0" y1="0" x2="0" y2="1">
@@ -45,30 +40,41 @@ function MatchTrendChart() {
               </linearGradient>
             </defs>
 
-            <CartesianGrid stroke="#243041" vertical={false} />
+            <CartesianGrid
+              stroke="#243041"
+              vertical={true}
+              strokeDasharray="3 3"
+            />
 
             <XAxis
               dataKey="day"
               tick={{ fill: "#94A3B8", fontSize: 12 }}
               tickLine={false}
-              axisLine={false}
+              axisLine={{ stroke: "#475569" }}
             />
 
             <YAxis
               domain={[0, 100]}
               tick={{ fill: "#94A3B8", fontSize: 12 }}
               tickLine={false}
-              axisLine={false}
+              axisLine={{ stroke: "#475569" }}
               ticks={[0, 25, 50, 75, 100]}
               tickFormatter={(value) => `${value}%`}
             />
 
             <Area
-              type="monotone"
+              // type="monotone"
               dataKey="value"
               stroke="#22C55E"
               strokeWidth={3}
               fill="url(#matchGradient)"
+              dot={{
+                r: 5,
+                fill: "#22C55E",
+                stroke: "#BFCBFF",
+                strokeWidth: 2,
+              }}
+              activeDot={{ r: 7 }}
             />
           </AreaChart>
         </ResponsiveContainer>

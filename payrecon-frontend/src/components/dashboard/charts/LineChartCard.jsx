@@ -16,7 +16,9 @@ function LineChartCard() {
   return (
     <div className="bg-[#141C28] border border-[#243041] rounded-2xl p-3 h-[340px] w-full">
       <div className="flex justify-between items-center mb-5">
-        <h2 className="text-xl font-semibold mb-2 ml-2">Reconciliation Trend</h2>
+        <h2 className="text-xl font-semibold mb-2 ml-2">
+          Reconciliation Trend
+        </h2>
       </div>
 
       <ResponsiveContainer width="100%" height="80%">
@@ -37,7 +39,7 @@ function LineChartCard() {
           <CartesianGrid
             stroke="#243041"
             strokeDasharray="3 3"
-            vertical={false}
+            vertical={true}
           />
 
           {/* X-axis */}
@@ -53,18 +55,18 @@ function LineChartCard() {
             stroke="#94A3B8"
             tickLine={false}
             axisLine={{ stroke: "#475569" }}
-              width={55}
+            width={55}
           />
 
           {/* Tooltip on hover */}
-<Tooltip
-  content={<CustomTooltip />}
-  cursor={{
-    stroke: "#94A3B8",
-    strokeWidth: 1,
-    strokeDasharray: "4 4",
-  }}
-/>
+          <Tooltip
+            content={<CustomTooltip />}
+            cursor={{
+              stroke: "#94A3B8",
+              strokeWidth: 1,
+              strokeDasharray: "4 4",
+            }}
+          />
 
           {/* Blue area under the line */}
           <Area
