@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
+import AuthLayout from "../components/layout/AuthLayout";
 import MainLayout from "../components/layout/MainLayout";
 
 import Dashboard from "../pages/Dashboard";
@@ -11,10 +12,17 @@ import AuditTrail from "../pages/AuditTrail";
 import Approvals from "../pages/Approvals";
 import BatchDetail from "../pages/BatchDetail";
 
+import Login from "../pages/Login";
+
 function AppRoutes() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route element={<AuthLayout />}>
+          <Route path="/login" element={<Login />} />
+          <Route path="/login" element={<Login />} />
+        </Route>
+
         <Route element={<MainLayout />}>
           <Route path="/" element={<Dashboard />} />
           <Route path="/transactions" element={<Transactions />} />
@@ -25,7 +33,6 @@ function AppRoutes() {
           <Route path="/approvals" element={<Approvals />} />
           {/* <Route path="/batch/:id" element={<BatchDetail />} /> */}
           <Route path="/batches" element={<BatchDetail />} />
-
         </Route>
       </Routes>
     </BrowserRouter>
