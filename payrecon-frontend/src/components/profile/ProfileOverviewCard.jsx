@@ -2,7 +2,7 @@ import { Building2, Badge, CalendarDays, Camera } from "lucide-react";
 
 import CreateUserCard from "../common/CreateuserCard";
 
-const ProfileOverviewCard = () => {
+const ProfileOverviewCard = ({ user }) => {
   return (
     <CreateUserCard className="p-8">
       <div className="flex items-center justify-between">

@@ -12,11 +12,10 @@ import CreateUserCard from "../common/CreateuserCard";
 import Button from "../common/Button";
 import ProfileInfoItem from "./ProfileInfoItem";
 
-const PersonalInformationCard = () => {
+const PersonalInformationCard = ({ user }) => {
   return (
     <CreateUserCard>
       {/* Header */}
-
       <div className="flex items-center justify-between border-b border-slate-800 p-6">
         <div className="flex items-center gap-3">
           <div className="rounded-xl bg-blue-600/20 p-3">
@@ -37,35 +36,38 @@ const PersonalInformationCard = () => {
       </div>
 
       {/* Body */}
-
       <div className="px-6">
-        <ProfileInfoItem icon={User} label="Full Name" value="Ritika Sharma" />
+        <ProfileInfoItem icon={User} label="Full Name" value={user?.name} />
 
         <ProfileInfoItem
           icon={Mail}
           label="Email Address"
-          value="ritika.sharma@reconcileix.com"
+          value={user?.email}
         />
 
         <ProfileInfoItem
           icon={Phone}
           label="Phone Number"
-          value="+91 98765 43210"
+          value={user?.phone || "Not Available"}
         />
 
         <ProfileInfoItem
           icon={Building2}
           label="Department"
-          value="Finance & Accounts"
+          value={user?.department || "Not Assigned"}
         />
 
         <ProfileInfoItem
           icon={Briefcase}
           label="Designation"
-          value="Senior Reconciliation Analyst"
+          value={user?.designation || "Not Assigned"}
         />
 
-        <ProfileInfoItem icon={Badge} label="Employee ID" value="EMP10001" />
+        <ProfileInfoItem
+          icon={Badge}
+          label="Employee ID"
+          value={user?.employeeId || user?._id?.slice(-6).toUpperCase()}
+        />
       </div>
     </CreateUserCard>
   );

@@ -4,9 +4,12 @@ import { Eye, EyeOff, Lock, User } from "lucide-react";
 import toast from "react-hot-toast";
 
 import { login } from "../../api/authApi";
+import { useAuth } from "../../context/AuthContext";
 
 export default function LoginForm() {
   const navigate = useNavigate();
+
+  const { setUser } = useAuth();
 
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -32,6 +35,8 @@ export default function LoginForm() {
       setLoading(true);
 
       const data = await login(formData);
+
+      setUser(data.user);
 
       toast.success(data.message);
 
