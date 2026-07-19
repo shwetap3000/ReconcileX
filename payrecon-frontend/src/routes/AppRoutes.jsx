@@ -15,6 +15,8 @@ import BatchDetail from "../pages/BatchDetail";
 import Login from "../pages/Login";
 import ForgotPassword from "../pages/ForgotPassword";
 import ResetPassword from "../pages/ResetPassword";
+import CreateUser from "../pages/CreateUser";
+import EditUser from "../pages/EditUser";
 
 function AppRoutes() {
   return (
@@ -36,6 +38,8 @@ function AppRoutes() {
           <Route path="/approvals" element={<Approvals />} />
           {/* <Route path="/batch/:id" element={<BatchDetail />} /> */}
           <Route path="/batches" element={<BatchDetail />} />
+          <Route path="/create-user" element={<CreateUser />} />
+          <Route path="/edit-user" element={<EditUser />} />
         </Route>
       </Routes>
     </BrowserRouter>
