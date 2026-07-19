@@ -17,6 +17,7 @@ import ForgotPassword from "../pages/ForgotPassword";
 import ResetPassword from "../pages/ResetPassword";
 import CreateUser from "../pages/CreateUser";
 import EditUser from "../pages/EditUser";
+import MyProfile from "../pages/Myprofile";
 
 function AppRoutes() {
   return (
@@ -40,6 +41,7 @@ function AppRoutes() {
           <Route path="/batches" element={<BatchDetail />} />
           <Route path="/create-user" element={<CreateUser />} />
           <Route path="/edit-user" element={<EditUser />} />
+          <Route path="/my-profile" element={<MyProfile />} />
         </Route>
       </Routes>
     </BrowserRouter>
