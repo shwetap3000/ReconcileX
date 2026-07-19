@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import ProtectedRoute from "./protectedRoute";
+import PublicRoute from "./PublicRoutes";
 
 import AuthLayout from "../components/layout/AuthLayout";
 import MainLayout from "../components/layout/MainLayout";
@@ -25,27 +26,29 @@ function AppRoutes() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route element={<AuthLayout />}>
-          <Route path="/login" element={<Login />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
+        <Route element={<PublicRoute />}>
+          <Route element={<AuthLayout />}>
+            <Route path="/login" element={<Login />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+          </Route>
         </Route>
 
         <Route element={<ProtectedRoute />}>
-        <Route element={<MainLayout />}>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/transactions" element={<Transactions />} />
-          <Route path="/reconciliation" element={<Reconciliation />} />
-          <Route path="/upload" element={<UploadFiles />} />
-          <Route path="/reports" element={<Reports />} />
-          <Route path="/audit" element={<AuditTrail />} />
-          <Route path="/approvals" element={<Approvals />} />
-          {/* <Route path="/batch/:id" element={<BatchDetail />} /> */}
-          <Route path="/batches" element={<BatchDetail />} />
-          <Route path="/create-user" element={<CreateUser />} />
-          <Route path="/edit-user" element={<EditUser />} />
-          <Route path="/my-profile" element={<MyProfile />} />
-        </Route>
+          <Route element={<MainLayout />}>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/transactions" element={<Transactions />} />
+            <Route path="/reconciliation" element={<Reconciliation />} />
+            <Route path="/upload" element={<UploadFiles />} />
+            <Route path="/reports" element={<Reports />} />
+            <Route path="/audit" element={<AuditTrail />} />
+            <Route path="/approvals" element={<Approvals />} />
+            {/* <Route path="/batch/:id" element={<BatchDetail />} /> */}
+            <Route path="/batches" element={<BatchDetail />} />
+            <Route path="/create-user" element={<CreateUser />} />
+            <Route path="/edit-user" element={<EditUser />} />
+            <Route path="/my-profile" element={<MyProfile />} />
+          </Route>
         </Route>
       </Routes>
     </BrowserRouter>
