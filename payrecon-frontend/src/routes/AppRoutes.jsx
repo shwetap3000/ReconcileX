@@ -1,5 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
+import ProtectedRoute from "./protectedRoute";
+
 import AuthLayout from "../components/layout/AuthLayout";
 import MainLayout from "../components/layout/MainLayout";
 
@@ -29,6 +31,7 @@ function AppRoutes() {
           <Route path="/reset-password" element={<ResetPassword />} />
         </Route>
 
+        <Route element={<ProtectedRoute />}>
         <Route element={<MainLayout />}>
           <Route path="/" element={<Dashboard />} />
           <Route path="/transactions" element={<Transactions />} />
@@ -42,6 +45,7 @@ function AppRoutes() {
           <Route path="/create-user" element={<CreateUser />} />
           <Route path="/edit-user" element={<EditUser />} />
           <Route path="/my-profile" element={<MyProfile />} />
+        </Route>
         </Route>
       </Routes>
     </BrowserRouter>
