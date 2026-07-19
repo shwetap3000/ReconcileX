@@ -8,6 +8,7 @@ import {
   FiUpload,
   FiSettings,
   FiUsers,
+  FiLogOut,
 } from "react-icons/fi";
 
 export const navigation = [
@@ -46,10 +47,14 @@ export const navigation = [
     path: "/upload",
     icon: FiUpload,
   },
-  
   {
     name: "Users & Roles",
     path: "/users",
     icon: FiUsers,
+  },
+  {
+    name: "Logout",
+    icon: FiLogOut,
+    action: "logout",
   },
 ];
