@@ -25,6 +25,7 @@ import ForgotPassword from "../pages/ForgotPassword";
 import ResetPassword from "../pages/ResetPassword";
 
 import { ROLES } from "../constants/roles";
+import ChangePassword from "../pages/ChangePassword";
 
 function AppRoutes() {
   return (
@@ -40,9 +41,10 @@ function AppRoutes() {
 
         <Route element={<ProtectedRoute />}>
           <Route path="/403" element={<Unauthorized />} />
+          <Route path="/change-password" element={<ChangePassword />} />
 
           <Route element={<MainLayout />}>
-            <Route path="/" element={<Dashboard />} />
+            <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/transactions" element={<Transactions />} />
             <Route path="/reconciliation" element={<Reconciliation />} />
             <Route path="/upload" element={<UploadFiles />} />

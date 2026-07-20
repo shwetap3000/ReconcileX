@@ -95,8 +95,7 @@ export const login = async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
-          mustChangePassword: user.mustChangePassword,
-
+        mustChangePassword: user.mustChangePassword,
       },
     });
   } catch (error) {
@@ -125,7 +124,7 @@ export const logout = async (req, res) => {
   });
 };
 
-/// Change Password Controller
+// Change Password Controller
 export const changePassword = async (req, res) => {
   try {
     const { currentPassword, newPassword, confirmPassword } = req.body;
@@ -172,8 +171,7 @@ export const changePassword = async (req, res) => {
     if (isSamePassword) {
       return res.status(400).json({
         success: false,
-        message:
-          "New password cannot be the same as the current password.",
+        message: "New password cannot be the same as the current password.",
       });
     }
 

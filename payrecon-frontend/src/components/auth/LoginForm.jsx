@@ -40,10 +40,11 @@ export default function LoginForm() {
 
       toast.success(data.message);
 
-      console.log(data.user);
-
-      // replace this with AuthContext later
-      navigate("/");
+      if (data.user.mustChangePassword) {
+        navigate("/change-password", { replace: true });
+      } else {
+        navigate("/dashboard", { replace: true });
+      }
     } catch (error) {
       toast.error(error.message || "Login failed");
     } finally {

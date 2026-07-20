@@ -42,3 +42,9 @@ export const getMe = async () => {
     );
   }
 };
+
+export const changePassword = async (formData) => {
+  const response = await api.patch("/auth/change-password", formData);
+
+  return response.data;
+};
