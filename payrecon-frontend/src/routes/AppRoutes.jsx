@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import ProtectedRoute from "./ProtectedRoute";
 import PublicRoute from "./PublicRoutes";
@@ -44,6 +44,7 @@ function AppRoutes() {
           <Route path="/change-password" element={<ChangePassword />} />
 
           <Route element={<MainLayout />}>
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/transactions" element={<Transactions />} />
             <Route path="/reconciliation" element={<Reconciliation />} />
