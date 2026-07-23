@@ -27,9 +27,17 @@ export const protect = async (req, res, next) => {
 
     next();
   } catch (error) {
+    let message = "Invalid token";
+
+    if (error.name === "TokenExpiredError") {
+      message = "Session expired";
+    } else if (error.name === "JsonWebTokenError") {
+      message = "Invalid token";
+    }
+
     return res.status(401).json({
       success: false,
-      message: "Invalid token",
+      message,
     });
   }
 };

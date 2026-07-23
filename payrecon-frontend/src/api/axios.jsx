@@ -8,4 +8,30 @@ const api = axios.create({
   },
 });
 
+let sessionExpired = false;
+
+api.interceptors.response.use(
+  (response) => response,
+
+  (error) => {
+    const status = error.response?.status;
+
+    if (status === 401 && !sessionExpired) {
+      sessionExpired = true;
+
+      window.dispatchEvent(new Event("session-expired"));
+
+      setTimeout(() => {
+        sessionExpired = false;
+      }, 1000);
+    }
+
+    if (status === 403) {
+      window.dispatchEvent(new Event("access-denied"));
+    }
+
+    return Promise.reject(error);
+  },
+);
+
 export default api;
