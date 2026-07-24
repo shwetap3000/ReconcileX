@@ -1,13 +1,13 @@
-const ProfileInfoItem = ({ icon: Icon, label, value }) => {
+const ProfileInfoItem = ({ label, value, valueClassName = "" }) => {
   return (
-    <div className="flex items-center justify-between border-b border-slate-800 py-5 last:border-none">
-      <div className="flex items-center gap-3">
-        <Icon size={18} className="text-slate-400" />
+    <div className="flex flex-col gap-1 border-b border-slate-800/80 py-4 last:border-b-0 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+      <span className="text-sm text-slate-400">{label}</span>
 
-        <span className="text-slate-300">{label}</span>
-      </div>
-
-      <span className="font-medium text-white">{value}</span>
+      <span
+        className={`break-all text-sm font-medium text-slate-200 sm:text-right ${valueClassName}`}
+      >
+        {value || "Not provided"}
+      </span>
     </div>
   );
 };

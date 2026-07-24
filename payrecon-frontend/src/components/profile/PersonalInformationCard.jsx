@@ -1,75 +1,191 @@
-import {
-  User,
-  Mail,
-  Phone,
-  Building2,
-  Briefcase,
-  Badge,
-  Pencil,
-} from "lucide-react";
+import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
-import CreateUserCard from "../common/CreateuserCard";
-import Button from "../common/Button";
+import { useAuth } from "../../context/AuthContext";
+import { updateProfile } from "../../api/profileApi";
 import ProfileInfoItem from "./ProfileInfoItem";
 
 const PersonalInformationCard = ({ user }) => {
-  return (
-    <CreateUserCard>
-      {/* Header */}
-      <div className="flex items-center justify-between border-b border-slate-800 p-6">
-        <div className="flex items-center gap-3">
-          <div className="rounded-xl bg-blue-600/20 p-3">
-            <User className="text-blue-400" size={22} />
-          </div>
+  const { setUser } = useAuth();
 
-          <h2 className="text-2xl font-semibold text-white">
-            Personal Information
-          </h2>
+  const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const [formData, setFormData] = useState({
+    name: user?.name || "",
+    phone: user?.phone || "",
+  });
+
+  useEffect(() => {
+    setFormData({
+      name: user?.name || "",
+      phone: user?.phone || "",
+    });
+  }, [user]);
+
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+
+    setFormData((previous) => ({
+      ...previous,
+      [name]: value,
+    }));
+  };
+
+  const handleCancel = () => {
+    setFormData({
+      name: user?.name || "",
+      phone: user?.phone || "",
+    });
+
+    setIsEditing(false);
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    if (!formData.name.trim()) {
+      toast.error("Name is required.");
+      return;
+    }
+
+    try {
+      setIsSaving(true);
+
+      const data = await updateProfile({
+        name: formData.name.trim(),
+        phone: formData.phone.trim(),
+      });
+
+      setUser((previousUser) => ({
+        ...previousUser,
+        ...data.user,
+      }));
+
+      setIsEditing(false);
+
+      toast.success(data.message || "Profile updated successfully.");
+    } catch (error) {
+      toast.error(error.message || "Failed to update profile.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  return (
+    <div className="rounded-xl border border-slate-800 bg-slate-900/60">
+      <div className="flex items-center justify-between border-b border-slate-800 px-5 py-4">
+        <div>
+          <h3 className="font-semibold text-white">Personal Information</h3>
+
+          <p className="mt-1 text-xs text-slate-500">
+            Your personal and contact details.
+          </p>
         </div>
 
-        <Button variant="secondary">
-          <div className="flex items-center gap-2">
-            <Pencil size={16} />
+        {!isEditing && (
+          <button
+            type="button"
+            onClick={() => setIsEditing(true)}
+            className="rounded-lg border border-slate-700 px-3 py-2 text-sm font-medium text-slate-300 transition hover:border-blue-500/50 hover:bg-blue-500/10 hover:text-blue-400"
+          >
             Edit Profile
+          </button>
+        )}
+      </div>
+
+      {isEditing ? (
+        <form onSubmit={handleSubmit} className="space-y-5 p-5">
+          <div>
+            <label
+              htmlFor="profile-name"
+              className="mb-2 block text-sm text-slate-400"
+            >
+              Full Name
+            </label>
+
+            <input
+              id="profile-name"
+              type="text"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2.5 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-blue-500"
+              placeholder="Enter your full name"
+            />
           </div>
-        </Button>
-      </div>
 
-      {/* Body */}
-      <div className="px-6">
-        <ProfileInfoItem icon={User} label="Full Name" value={user?.name} />
+          <div>
+            <label
+              htmlFor="profile-email"
+              className="mb-2 block text-sm text-slate-400"
+            >
+              Email Address
+            </label>
 
-        <ProfileInfoItem
-          icon={Mail}
-          label="Email Address"
-          value={user?.email}
-        />
+            <input
+              id="profile-email"
+              type="email"
+              value={user?.email || ""}
+              disabled
+              className="w-full cursor-not-allowed rounded-lg border border-slate-800 bg-slate-950/50 px-3 py-2.5 text-sm text-slate-500"
+            />
 
-        <ProfileInfoItem
-          icon={Phone}
-          label="Phone Number"
-          value={user?.phone || "Not Available"}
-        />
+            <p className="mt-1.5 text-xs text-slate-600">
+              Email address cannot be changed from your profile.
+            </p>
+          </div>
 
-        <ProfileInfoItem
-          icon={Building2}
-          label="Department"
-          value={user?.department || "Not Assigned"}
-        />
+          <div>
+            <label
+              htmlFor="profile-phone"
+              className="mb-2 block text-sm text-slate-400"
+            >
+              Phone Number
+            </label>
 
-        <ProfileInfoItem
-          icon={Briefcase}
-          label="Designation"
-          value={user?.designation || "Not Assigned"}
-        />
+            <input
+              id="profile-phone"
+              type="tel"
+              name="phone"
+              value={formData.phone}
+              onChange={handleChange}
+              className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2.5 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-blue-500"
+              placeholder="Enter your phone number"
+            />
+          </div>
 
-        <ProfileInfoItem
-          icon={Badge}
-          label="Employee ID"
-          value={user?.employeeId || user?._id?.slice(-6).toUpperCase()}
-        />
-      </div>
-    </CreateUserCard>
+          <div className="flex justify-end gap-3 border-t border-slate-800 pt-5">
+            <button
+              type="button"
+              onClick={handleCancel}
+              disabled={isSaving}
+              className="rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-300 transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Cancel
+            </button>
+
+            <button
+              type="submit"
+              disabled={isSaving}
+              className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {isSaving ? "Saving..." : "Save Changes"}
+            </button>
+          </div>
+        </form>
+      ) : (
+        <div className="px-5">
+          <ProfileInfoItem label="Full Name" value={user?.name} />
+
+          <ProfileInfoItem label="Email Address" value={user?.email} />
+
+          <ProfileInfoItem label="Phone Number" value={user?.phone} />
+
+          <ProfileInfoItem label="Role" value={user?.role} />
+        </div>
+      )}
+    </div>
   );
 };
 

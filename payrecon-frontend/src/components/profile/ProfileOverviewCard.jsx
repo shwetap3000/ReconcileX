@@ -1,74 +1,69 @@
-import { Building2, Badge, CalendarDays, Camera } from "lucide-react";
-
-import CreateUserCard from "../common/CreateuserCard";
-
 const ProfileOverviewCard = ({ user }) => {
+  const joinedDate = user?.createdAt
+    ? new Date(user.createdAt).toLocaleDateString("en-IN", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      })
+    : "Not available";
+
+  const initial = user?.name?.charAt(0)?.toUpperCase() || "U";
+
   return (
-    <CreateUserCard className="p-8">
-      <div className="flex items-center justify-between">
-        {/* Left Section */}
-
-        <div className="flex items-center gap-8">
-          {/* Avatar */}
-
-          <div className="relative">
+    <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-6">
+      <div className="flex flex-col gap-6 md:flex-row md:items-center">
+        {/* Profile Picture */}
+        <div className="shrink-0">
+          {user?.profilePicture ? (
             <img
-              src="https://i.pravatar.cc/200?img=32"
-              alt="Profile"
-              className="h-32 w-32 rounded-full object-cover border-2 border-slate-700"
+              src={user.profilePicture}
+              alt={`${user.name}'s profile`}
+              className="h-24 w-24 rounded-full object-cover ring-2 ring-slate-700"
             />
-
-            <button className="absolute bottom-1 right-1 rounded-full bg-blue-600 p-2 hover:bg-blue-500 transition">
-              <Camera size={18} className="text-white" />
-            </button>
-          </div>
-
-          {/* User Info */}
-
-          <div>
-            <h2 className="text-4xl font-semibold text-white">Ritika Sharma</h2>
-
-            <span className="mt-3 inline-flex rounded-full bg-blue-600/20 px-4 py-1 text-blue-400">
-              Admin
-            </span>
-          </div>
+          ) : (
+            <div className="flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-3xl font-semibold text-white ring-2 ring-slate-700">
+              {initial}
+            </div>
+          )}
         </div>
 
-        {/* Right Section */}
+        {/* User Information */}
+        <div className="min-w-0 flex-1">
+          <div>
+            <h2 className="truncate text-2xl font-semibold text-white">
+              {user?.name || "User"}
+            </h2>
 
-        <div className="flex gap-16">
-          <div className="flex items-center gap-3">
-            <Building2 className="text-slate-400" size={22} />
-
-            <div>
-              <p className="text-lg text-white">Finance & Accounts</p>
-
-              <p className="text-slate-500">Department</p>
-            </div>
+            <span className="mt-2 inline-flex rounded-full border border-blue-500/20 bg-blue-500/10 px-3 py-1 text-xs font-medium text-blue-400">
+              {user?.role || "N/A"}
+            </span>
           </div>
 
-          <div className="flex items-center gap-3">
-            <Badge className="text-slate-400" size={22} />
+          {/* Metadata */}
+          <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2">
+            <div className="border-slate-800 sm:border-r">
+              <p className="text-xs uppercase tracking-wide text-slate-500">
+                Employee ID
+              </p>
 
-            <div>
-              <p className="text-lg text-white">EMP10001</p>
-
-              <p className="text-slate-500">Employee ID</p>
+              <p className="mt-1 text-sm font-medium text-slate-200">
+                {user?.employeeId || "Not assigned"}
+              </p>
             </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <CalendarDays className="text-slate-400" size={22} />
 
             <div>
-              <p className="text-lg text-white">Jan 10, 2026</p>
+              <p className="text-xs uppercase tracking-wide text-slate-500">
+                Joined Date
+              </p>
 
-              <p className="text-slate-500">Joined Date</p>
+              <p className="mt-1 text-sm font-medium text-slate-200">
+                {joinedDate}
+              </p>
             </div>
           </div>
         </div>
       </div>
-    </CreateUserCard>
+    </div>
   );
 };
 
