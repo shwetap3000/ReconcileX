@@ -32,6 +32,30 @@ const userSchema = new mongoose.Schema(
       //   default: "MAKER",
     },
 
+    phone: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+
+    profilePicture: {
+      type: String,
+      default: "",
+    },
+
+    employeeId: {
+      type: String,
+      unique: true,
+      sparse: true,
+      trim: true,
+    },
+
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
+
     isActive: {
       type: Boolean,
       default: true,
@@ -49,6 +73,8 @@ const userSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
   },
 );
 
@@ -77,6 +103,11 @@ userSchema.pre("save", async function () {
 userSchema.methods.comparePassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
+
+// Virtual field
+userSchema.virtual("profileCompleted").get(function () {
+  return Boolean(this.phone);
+});
 
 const User = mongoose.model("User", userSchema);
 

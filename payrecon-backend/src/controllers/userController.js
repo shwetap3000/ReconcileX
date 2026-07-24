@@ -75,7 +75,6 @@ export const updateUserRole = async (req, res) => {
       message: "User role updated successfully",
       user: updatedUser,
     });
-
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -99,9 +98,7 @@ export const updateUserStatus = async (req, res) => {
     }
 
     // Prevent self deactivation
-    if (
-      user._id.toString() === req.user._id.toString()
-    ) {
+    if (user._id.toString() === req.user._id.toString()) {
       return res.status(400).json({
         success: false,
         message: "You cannot deactivate your own account",
@@ -112,9 +109,7 @@ export const updateUserStatus = async (req, res) => {
     if (user.isActive === isActive) {
       return res.status(400).json({
         success: false,
-        message: `User is already ${
-          isActive ? "active" : "inactive"
-        }`,
+        message: `User is already ${isActive ? "active" : "inactive"}`,
       });
     }
 
@@ -122,15 +117,11 @@ export const updateUserStatus = async (req, res) => {
 
     await user.save();
 
-    const updatedUser = await User.findById(
-      user._id
-    ).select("-password");
+    const updatedUser = await User.findById(user._id).select("-password");
 
     res.status(200).json({
       success: true,
-      message: `User ${
-        isActive ? "activated" : "deactivated"
-      } successfully`,
+      message: `User ${isActive ? "activated" : "deactivated"} successfully`,
       user: updatedUser,
     });
   } catch (error) {

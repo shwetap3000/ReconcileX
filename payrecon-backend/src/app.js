@@ -6,14 +6,17 @@ import userRoutes from "./routes/userRoutes.js";
 import batchRoutes from "./routes/batchRoutes.js";
 import reportRoutes from "./routes/reportRoutes.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
+import profileRoutes from "./routes/profileRoutes.js";
 
 const app = express();
 
-// middleware
-app.use(cors({
+// middlewares
+app.use(
+  cors({
     origin: "http://localhost:5173",
     credentials: true,
-  }));
+  }),
+);
 app.use(express.json());
 app.use(cookieParser());
 
@@ -23,8 +26,9 @@ app.use("/api/users", userRoutes);
 app.use("/api/batches", batchRoutes);
 app.use("/api/reports", reportRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/profile", profileRoutes);
 
-app.get("/api/health", (req, res) => {
+app.get("/api/test", (req, res) => {
   res.json({
     success: true,
     message: "PayRecon Backend Running",

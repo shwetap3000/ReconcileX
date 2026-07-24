@@ -23,6 +23,7 @@ export const register = async (req, res) => {
       password,
       role,
       mustChangePassword: true,
+      createdBy: req.user._id,
     });
 
     return res.status(201).json({
@@ -108,10 +109,28 @@ export const login = async (req, res) => {
 
 // to get the user profile
 export const getMe = async (req, res) => {
-  res.status(200).json({
-    success: true,
-    user: req.user,
-  });
+  try {
+    const user = await User.findById(req.user._id)
+      .select("-password")
+      .populate("createdBy", "name email");
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      user,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
 };
 
 // logout controller
