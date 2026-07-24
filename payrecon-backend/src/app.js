@@ -1,7 +1,9 @@
 import express from "express";
 import cors from "cors";
-import authRoutes from "./routes/authRoutes.js";
 import cookieParser from "cookie-parser";
+import path from "path";
+
+import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import batchRoutes from "./routes/batchRoutes.js";
 import reportRoutes from "./routes/reportRoutes.js";
@@ -27,6 +29,7 @@ app.use("/api/batches", batchRoutes);
 app.use("/api/reports", reportRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/profile", profileRoutes);
+app.use("/uploads", express.static(path.resolve("uploads")));
 
 app.get("/api/test", (req, res) => {
   res.json({
