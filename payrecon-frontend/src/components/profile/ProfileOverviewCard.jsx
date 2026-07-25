@@ -1,3 +1,5 @@
+import ProfilePictureUpload from "./ProfilePictureUpload";
+
 const ProfileOverviewCard = ({ user }) => {
   const joinedDate = user?.createdAt
     ? new Date(user.createdAt).toLocaleDateString("en-IN", {
@@ -14,17 +16,7 @@ const ProfileOverviewCard = ({ user }) => {
       <div className="flex flex-col gap-6 md:flex-row md:items-center">
         {/* Profile Picture */}
         <div className="shrink-0">
-          {user?.profilePicture ? (
-            <img
-              src={user.profilePicture}
-              alt={`${user.name}'s profile`}
-              className="h-24 w-24 rounded-full object-cover ring-2 ring-slate-700"
-            />
-          ) : (
-            <div className="flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-3xl font-semibold text-white ring-2 ring-slate-700">
-              {initial}
-            </div>
-          )}
+          <ProfilePictureUpload user={user} />
         </div>
 
         {/* User Information */}
