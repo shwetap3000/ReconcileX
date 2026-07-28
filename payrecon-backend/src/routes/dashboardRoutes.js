@@ -12,13 +12,8 @@ import { authorizeRoles } from "../middleware/authorizeRoles.js";
 const router = express.Router();
 
 router.get("/stats", protect, getDashboardStats);
+router.get("/recent-batches", protect, getRecentBatches);
 
-router.get(
-  "/recent-batches",
-  protect,
-  authorizeRoles("ADMIN"),
-  getRecentBatches,
-);
 router.get(
   "/recent-activities",
   protect,

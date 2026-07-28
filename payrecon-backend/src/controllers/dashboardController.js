@@ -47,8 +47,41 @@ export const getDashboardStats = async (req, res) => {
 
 export const getRecentBatches = async (req, res) => {
   try {
-    const recentBatches = await Batch.find()
-      .select("batchId batchName status createdByName createdAt")
+    const { role, _id } = req.user;
+
+    let query = {};
+
+    switch (role) {
+      case "ADMIN":
+        // Admin can see all batches
+        query = {};
+        break;
+
+      case "MAKER":
+        // Maker sees only batches created by them
+        query = {
+          createdBy: _id,
+        };
+        break;
+
+      case "CHECKER":
+        // Checker sees batches pending/recently reviewed
+        query = {
+          status: {
+            $in: ["SUBMITTED", "APPROVED", "REJECTED"],
+          },
+        };
+        break;
+
+      default:
+        return res.status(403).json({
+          success: false,
+          message: "Unauthorized role",
+        });
+    }
+
+    const recentBatches = await Batch.find(query)
+      .select("batchId batchName status createdByName createdAt updatedAt")
       .sort({ createdAt: -1 })
       .limit(5);
 
