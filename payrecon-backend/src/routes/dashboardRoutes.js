@@ -13,20 +13,8 @@ const router = express.Router();
 
 router.get("/stats", protect, getDashboardStats);
 router.get("/recent-batches", protect, getRecentBatches);
-
-router.get(
-  "/recent-activities",
-  protect,
-  authorizeRoles("ADMIN"),
-  getRecentActivities,
-);
-router.get(
-  "/status-distribution",
-  protect,
-  authorizeRoles("ADMIN"),
-  getStatusDistribution,
-);
-
-router.get("/monthly-trend", protect, authorizeRoles("ADMIN"), getMonthlyTrend);
+router.get("/recent-activities", protect, getRecentActivities);
+router.get("/status-distribution", protect, getStatusDistribution);
+router.get("/monthly-trend", protect, getMonthlyTrend);
 
 export default router;

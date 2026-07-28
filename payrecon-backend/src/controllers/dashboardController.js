@@ -102,7 +102,45 @@ export const getRecentBatches = async (req, res) => {
 
 export const getRecentActivities = async (req, res) => {
   try {
-    const activities = await AuditLog.find()
+    const { role, _id } = req.user;
+
+    let query = {};
+
+    switch (role) {
+      case "ADMIN":
+        // Admin sees all activities
+        query = {};
+        break;
+
+      case "MAKER":
+        // Maker sees only their own activities
+        query = {
+          performedBy: _id,
+        };
+        break;
+
+      case "CHECKER":
+        // Checker sees only review-related activities
+        query = {
+          action: {
+            $in: [
+              "BATCH_SUBMITTED",
+              "BATCH_APPROVED",
+              "BATCH_REJECTED",
+              "BATCH_RESUBMITTED",
+            ],
+          },
+        };
+        break;
+
+      default:
+        return res.status(403).json({
+          success: false,
+          message: "Unauthorized role",
+        });
+    }
+
+    const activities = await AuditLog.find(query)
       .populate("performedBy", "name email")
       .populate("batchId", "batchId batchName")
       .sort({ createdAt: -1 })
@@ -125,11 +163,51 @@ export const getRecentActivities = async (req, res) => {
 
 export const getStatusDistribution = async (req, res) => {
   try {
+    const { role, _id } = req.user;
+
+    let matchStage = {};
+
+    switch (role) {
+      case "ADMIN":
+        matchStage = {};
+        break;
+
+      case "MAKER":
+        matchStage = {
+          createdBy: _id,
+        };
+        break;
+
+      case "CHECKER":
+        matchStage = {
+          status: {
+            $in: ["SUBMITTED", "APPROVED", "REJECTED"],
+          },
+        };
+        break;
+
+      default:
+        return res.status(403).json({
+          success: false,
+          message: "Unauthorized role",
+        });
+    }
+
     const distribution = await Batch.aggregate([
+      {
+        $match: matchStage,
+      },
       {
         $group: {
           _id: "$status",
-          count: { $sum: 1 },
+          count: {
+            $sum: 1,
+          },
+        },
+      },
+      {
+        $sort: {
+          _id: 1,
         },
       },
     ]);
@@ -150,12 +228,49 @@ export const getStatusDistribution = async (req, res) => {
 
 export const getMonthlyTrend = async (req, res) => {
   try {
+    const { role, _id } = req.user;
+
+    let matchStage = {};
+
+    switch (role) {
+      case "ADMIN":
+        matchStage = {};
+        break;
+
+      case "MAKER":
+        matchStage = {
+          createdBy: _id,
+        };
+        break;
+
+      case "CHECKER":
+        matchStage = {
+          status: {
+            $in: ["SUBMITTED", "APPROVED", "REJECTED"],
+          },
+        };
+        break;
+
+      default:
+        return res.status(403).json({
+          success: false,
+          message: "Unauthorized role",
+        });
+    }
+
     const trend = await Batch.aggregate([
+      {
+        $match: matchStage,
+      },
       {
         $group: {
           _id: {
-            year: { $year: "$createdAt" },
-            month: { $month: "$createdAt" },
+            year: {
+              $year: "$createdAt",
+            },
+            month: {
+              $month: "$createdAt",
+            },
           },
           totalBatches: {
             $sum: 1,
