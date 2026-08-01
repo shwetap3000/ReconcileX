@@ -1,18 +1,17 @@
 function CustomTooltip({ active, payload, label }) {
-  if (!active || !payload || !payload.length) return null;
+  if (!active || !payload?.length) return null;
 
   return (
-    <div className="min-w-[150px] rounded-xl border border-[#243041] bg-[#141C28] p-4 shadow-2xl">
-      <p className="text-xs text-gray-400">{label}</p>
+    <div className="bg-[#1B2535] border border-[#243041] rounded-xl p-4 shadow-lg">
+      <p className="text-gray-400 mb-3">{label}</p>
 
-      <div className="mt-3 flex items-center gap-2">
-        <span className="h-3 w-3 rounded-full bg-[#4F6BFF]" />
-
-        <span className="text-sm text-gray-300">Reconciliations</span>
+      <div className="flex items-center gap-2 mb-3">
+        <div className="w-3 h-3 rounded-full bg-[#4F6BFF]" />
+        <span className="text-gray-300">Batches</span>
       </div>
 
-      <p className="mt-2 text-2xl font-bold text-white">
-        {payload[0].value.toLocaleString()}
+      <p className="text-white text-3xl font-bold">
+        {payload[0].value}
       </p>
     </div>
   );
