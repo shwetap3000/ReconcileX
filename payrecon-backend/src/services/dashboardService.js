@@ -1,101 +1,86 @@
 import Batch from "../models/Batch.js";
 
 export const getAdminStats = async () => {
-  const batches = await Batch.find();
+  const batches = await Batch.find().lean();
 
-  let draft = 0;
-  let partialUpload = 0;
-  let uploaded = 0;
-  let submitted = 0;
-  let approved = 0;
-  let rejected = 0;
-
-  let matchedTransactions = 0;
-  let totalReconciled = 0;
+  let totalTransactions = 0;
+  let reconciled = 0;
+  let exceptions = 0;
+  let pending = 0;
 
   for (const batch of batches) {
-    switch (batch.status) {
-      case "DRAFT":
-        draft++;
-        break;
+    const batchExceptions =
+      (batch.amountMismatchCount || 0) +
+      (batch.dateMismatchCount || 0) +
+      (batch.missingInBankCount || 0) +
+      (batch.missingInLedgerCount || 0);
 
-      case "PARTIAL_UPLOAD":
-        partialUpload++;
-        break;
+    const batchTransactions =
+      (batch.matchedTransactions || 0) + batchExceptions;
 
-      case "UPLOADED":
-        uploaded++;
-        break;
+    totalTransactions += batchTransactions;
 
-      case "SUBMITTED":
-        submitted++;
-        break;
+    reconciled += batch.matchedTransactions || 0;
 
-      case "APPROVED":
-        approved++;
-        break;
+    exceptions += batchExceptions;
 
-      case "REJECTED":
-        rejected++;
-        break;
+    if (
+      [
+        "DRAFT",
+        "PARTIAL_UPLOAD",
+        "UPLOADED",
+        "SUBMITTED",
+        "UNDER_REVIEW",
+      ].includes(batch.status)
+    ) {
+      pending += batchTransactions;
     }
-
-    matchedTransactions += batch.matchedTransactions;
-
-    totalReconciled +=
-      batch.matchedTransactions +
-      batch.amountMismatchCount +
-      batch.dateMismatchCount +
-      batch.missingInBankCount +
-      batch.missingInLedgerCount;
   }
 
   return {
-    totalBatches: batches.length,
-    draft,
-    partialUpload,
-    uploaded,
-    submitted,
-    approved,
-    rejected,
-    overallMatchPercentage:
-      totalReconciled === 0
-        ? 0
-        : Number(((matchedTransactions / totalReconciled) * 100).toFixed(2)),
+    totalTransactions,
+    reconciled,
+    pending,
+    exceptions,
   };
 };
 
 export const getMakerStats = async (makerId) => {
   const batches = await Batch.find({
     createdBy: makerId,
-  });
+  }).lean();
 
-  let draft = 0;
-  let awaitingReview = 0;
-  let rejected = 0;
+  let myTransactions = 0;
+  let reconciled = 0;
+  let pendingReview = 0;
+  let exceptions = 0;
 
   for (const batch of batches) {
-    switch (batch.status) {
-      case "DRAFT":
-        draft++;
-        break;
+    const batchExceptions =
+      (batch.amountMismatchCount || 0) +
+      (batch.dateMismatchCount || 0) +
+      (batch.missingInBankCount || 0) +
+      (batch.missingInLedgerCount || 0);
 
-      case "SUBMITTED":
-      case "UNDER_REVIEW":
-        awaitingReview++;
-        break;
+    const batchTransactions =
+      (batch.matchedTransactions || 0) + batchExceptions;
 
-      case "REJECTED":
-        rejected++;
-        break;
+    myTransactions += batchTransactions;
+
+    reconciled += batch.matchedTransactions || 0;
+
+    exceptions += batchExceptions;
+
+    if (["SUBMITTED", "UNDER_REVIEW"].includes(batch.status)) {
+      pendingReview += batchTransactions;
     }
   }
 
   return {
-    myBatches: batches.length,
-    draft,
-    awaitingReview,
-    rejected,
+    myTransactions,
+    reconciled,
+    pendingReview,
+    exceptions,
   };
 };
 
@@ -104,46 +89,38 @@ export const getCheckerStats = async () => {
     status: {
       $in: ["SUBMITTED", "UNDER_REVIEW", "APPROVED", "REJECTED"],
     },
-  });
+  })
+    .select("status")
+    .lean();
 
-  let awaitingReview = 0;
+  let batchesToReview = 0;
+  let underReview = 0;
   let approved = 0;
   let rejected = 0;
-  let reviewedToday = 0;
-
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
 
   for (const batch of batches) {
     switch (batch.status) {
       case "SUBMITTED":
+        batchesToReview++;
+        break;
+
       case "UNDER_REVIEW":
-        awaitingReview++;
+        underReview++;
         break;
 
       case "APPROVED":
         approved++;
-
-        if (batch.updatedAt >= today) {
-          reviewedToday++;
-        }
-
         break;
 
       case "REJECTED":
         rejected++;
-
-        if (batch.updatedAt >= today) {
-          reviewedToday++;
-        }
-
         break;
     }
   }
 
   return {
-    awaitingReview,
-    reviewedToday,
+    batchesToReview,
+    underReview,
     approved,
     rejected,
   };

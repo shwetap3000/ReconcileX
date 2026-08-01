@@ -1,0 +1,117 @@
+import {
+  Activity,
+  CheckCircle2,
+  Clock3,
+  AlertCircle,
+  ClipboardCheck,
+  Eye,
+  ShieldCheck,
+  XCircle,
+} from "lucide-react";
+
+export const dashboardStatsConfig = {
+  ADMIN: [
+    {
+      key: "totalTransactions",
+      title: "Total Transactions",
+      icon: Activity,
+      iconBg: "bg-blue-600",
+      change: "Live Data",
+      changeColor: "text-green-400",
+    },
+    {
+      key: "reconciled",
+      title: "Reconciled",
+      icon: CheckCircle2,
+      iconBg: "bg-green-600",
+      change: "Live Data",
+      changeColor: "text-green-400",
+    },
+    {
+      key: "pending",
+      title: "Pending",
+      icon: Clock3,
+      iconBg: "bg-orange-500",
+      change: "Live Data",
+      changeColor: "text-orange-400",
+    },
+    {
+      key: "exceptions",
+      title: "Exceptions",
+      icon: AlertCircle,
+      iconBg: "bg-red-600",
+      change: "Live Data",
+      changeColor: "text-red-400",
+    },
+  ],
+
+  MAKER: [
+    {
+      key: "myTransactions",
+      title: "My Transactions",
+      icon: Activity,
+      iconBg: "bg-blue-600",
+      change: "Live Data",
+      changeColor: "text-green-400",
+    },
+    {
+      key: "reconciled",
+      title: "Reconciled",
+      icon: CheckCircle2,
+      iconBg: "bg-green-600",
+      change: "Live Data",
+      changeColor: "text-green-400",
+    },
+    {
+      key: "pendingReview",
+      title: "Pending Review",
+      icon: Clock3,
+      iconBg: "bg-orange-500",
+      change: "Live Data",
+      changeColor: "text-orange-400",
+    },
+    {
+      key: "exceptions",
+      title: "Exceptions",
+      icon: AlertCircle,
+      iconBg: "bg-red-600",
+      change: "Live Data",
+      changeColor: "text-red-400",
+    },
+  ],
+
+  CHECKER: [
+    {
+      key: "batchesToReview",
+      title: "Batches To Review",
+      icon: ClipboardCheck,
+      iconBg: "bg-blue-600",
+      change: "Live Data",
+      changeColor: "text-green-400",
+    },
+    {
+      key: "underReview",
+      title: "Under Review",
+      icon: Eye,
+      iconBg: "bg-orange-500",
+      change: "Live Data",
+      changeColor: "text-orange-400",
+    },
+    {
+      key: "approved",
+      title: "Approved",
+      icon: ShieldCheck,
+      iconBg: "bg-green-600",
+      change: "Live Data",
+      changeColor: "text-green-400",
+    },
+    {
+      key: "rejected",
+      title: "Rejected",
+      icon: XCircle,
+      iconBg: "bg-red-600",
+      change: "Live Data",
+      changeColor: "text-red-400",
+    },
+  ],
+};

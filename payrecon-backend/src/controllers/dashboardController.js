@@ -68,7 +68,7 @@ export const getRecentBatches = async (req, res) => {
         // Checker sees batches pending/recently reviewed
         query = {
           status: {
-            $in: ["SUBMITTED", "APPROVED", "REJECTED"],
+            $in: ["SUBMITTED", "UNDER_REVIEW", "APPROVED", "REJECTED"],
           },
         };
         break;
@@ -81,14 +81,52 @@ export const getRecentBatches = async (req, res) => {
     }
 
     const recentBatches = await Batch.find(query)
-      .select("batchId batchName status createdByName createdAt updatedAt")
+      .select(`
+        batchId
+        batchName
+        status
+        createdByName
+        createdAt
+        matchedTransactions
+        amountMismatchCount
+        dateMismatchCount
+        missingInBankCount
+        missingInLedgerCount
+      `)
       .sort({ createdAt: -1 })
-      .limit(5);
+      .limit(5)
+      .lean();
+
+    const progressMap = {
+      DRAFT: 10,
+      PARTIAL_UPLOAD: 30,
+      UPLOADED: 50,
+      SUBMITTED: 70,
+      UNDER_REVIEW: 85,
+      APPROVED: 100,
+      REJECTED: 100,
+      RECONCILED: 100,
+    };
+
+    const formattedBatches = recentBatches.map((batch) => {
+      const transactions =
+        (batch.matchedTransactions || 0) +
+        (batch.amountMismatchCount || 0) +
+        (batch.dateMismatchCount || 0) +
+        (batch.missingInBankCount || 0) +
+        (batch.missingInLedgerCount || 0);
+
+      return {
+        ...batch,
+        transactions,
+        progress: progressMap[batch.status] || 0,
+      };
+    });
 
     return res.status(200).json({
       success: true,
-      total: recentBatches.length,
-      recentBatches,
+      total: formattedBatches.length,
+      recentBatches: formattedBatches,
     });
   } catch (error) {
     console.error(error);
@@ -144,7 +182,7 @@ export const getRecentActivities = async (req, res) => {
       .populate("performedBy", "name email")
       .populate("batchId", "batchId batchName")
       .sort({ createdAt: -1 })
-      .limit(10);
+      .limit(5);
 
     return res.status(200).json({
       success: true,

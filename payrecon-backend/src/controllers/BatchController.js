@@ -65,30 +65,99 @@ export const createBatch = async (req, res) => {
 export const getBatches = async (req, res) => {
   try {
     const page = Number(req.query.page) || 1;
-
     const limit = Number(req.query.limit) || 10;
-
     const skip = (page - 1) * limit;
 
-    const totalBatches = await Batch.countDocuments();
+    const { role, _id } = req.user;
 
-    const batches = await Batch.find()
-      .select("batchId batchName status createdByName createdAt")
-      .sort({
-        createdAt: -1,
-      })
+    let query = {};
+
+    switch (role) {
+      case "ADMIN":
+        // Admin sees all batches
+        query = {};
+        break;
+
+      case "MAKER":
+        // Maker sees only their own batches
+        query = {
+          createdBy: _id,
+        };
+        break;
+
+      case "CHECKER":
+        // Checker sees batches that require review or have been reviewed
+        query = {
+          status: {
+            $in: ["SUBMITTED", "UNDER_REVIEW", "APPROVED", "REJECTED"],
+          },
+        };
+        break;
+
+      default:
+        return res.status(403).json({
+          success: false,
+          message: "Unauthorized role",
+        });
+    }
+
+    const totalBatches = await Batch.countDocuments(query);
+
+    const batches = await Batch.find(query)
+      .select(
+        `
+        batchId
+        batchName
+        status
+        createdByName
+        createdAt
+        matchedTransactions
+        amountMismatchCount
+        dateMismatchCount
+        missingInBankCount
+        missingInLedgerCount
+      `,
+      )
+      .sort({ createdAt: -1 })
       .skip(skip)
-      .limit(limit);
+      .limit(limit)
+      .lean();
 
-    res.status(200).json({
+    const progressMap = {
+      DRAFT: 10,
+      PARTIAL_UPLOAD: 30,
+      UPLOADED: 50,
+      SUBMITTED: 70,
+      UNDER_REVIEW: 85,
+      APPROVED: 100,
+      REJECTED: 100,
+      RECONCILED: 100,
+    };
+
+    const formattedBatches = batches.map((batch) => {
+      const transactions =
+        (batch.matchedTransactions || 0) +
+        (batch.amountMismatchCount || 0) +
+        (batch.dateMismatchCount || 0) +
+        (batch.missingInBankCount || 0) +
+        (batch.missingInLedgerCount || 0);
+
+      return {
+        ...batch,
+        transactions,
+        progress: progressMap[batch.status] || 0,
+      };
+    });
+
+    return res.status(200).json({
       success: true,
-      count: batches.length,
+      count: formattedBatches.length,
       page,
       totalPages: Math.ceil(totalBatches / limit),
-      batches,
+      batches: formattedBatches,
     });
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: error.message,
     });

@@ -10,10 +10,16 @@ function RecentBatchRow({ batch }) {
   return (
     <tr className="border-b border-[#243041] hover:bg-[#182233] transition-colors">
       {/* Batch ID */}
-      <td className="px-3 py-4 text-gray-300 text-[14px]">{batch.id}</td>
+      <td className="px-3 py-4 text-gray-300 text-[14px]">{batch.batchId}</td>
 
       {/* Created Date */}
-      <td className="px-4 py-4 text-gray-400">{batch.date}</td>
+      <td className="px-4 py-4 text-gray-400">
+        {new Date(batch.createdAt).toLocaleDateString("en-IN", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+        })}
+      </td>
 
       {/* Transactions */}
       <td className="px-6 py-4 text-gray-300">{batch.transactions}</td>

@@ -22,7 +22,7 @@ const router = express.Router();
 
 // Collection routes
 router.post("/", protect, authorizeRoles("MAKER", "ADMIN"), createBatch);
-router.get("/", protect, authorizeRoles("ADMIN", "MAKER"), getBatches);
+router.get("/", protect, authorizeRoles("ADMIN", "MAKER", "CHECKER"), getBatches);
 
 // Static routes
 router.get(
