@@ -1,10 +1,45 @@
+import { useEffect, useState } from "react";
 import BatchRow from "./BatchRow";
 import BatchToolbar from "./BatchToolbar";
-import { batchData } from "../../constants/batchData";
+import { getBatches } from "../../api/batchApi";
 
 function BatchTable() {
+  const [batches, setBatches] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  // Pagination (for later)
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
+  const fetchBatches = async () => {
+    try {
+      setLoading(true);
+      setError("");
+
+      const response = await getBatches(page);
+
+      if (response.success) {
+        setBatches(response.batches);
+        setTotalPages(response.totalPages);
+      }
+    } catch (err) {
+      console.error("Error fetching batches:", err);
+
+      setError(err.response?.data?.message || "Failed to load batches.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchBatches();
+  }, [page]);
+
   return (
     <div className="bg-[#141C28] border border-[#243041] rounded-2xl overflow-hidden">
+      {/* Header */}
+
       <div className="flex justify-between items-center px-6 py-4 border-b border-[#243041]">
         <div>
           <h2 className="text-xl font-semibold">All Batches</h2>
@@ -14,50 +49,98 @@ function BatchTable() {
           </p>
         </div>
 
-        <BatchToolbar />
+        <BatchToolbar refreshBatches={fetchBatches} />
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead className="bg-[#111827] border-b border-[#243041]">
-            <tr>
-              <th className="px-6 py-4 text-left text-xs uppercase text-gray-400">
-                Batch ID
-              </th>
+      {/* Loading */}
 
-              <th className="px-6 py-4 text-left text-xs uppercase text-gray-400">
-                Batch Name
-              </th>
+      {loading ? (
+        <div className="flex justify-center items-center py-20">
+          <p className="text-gray-400 text-lg">Loading batches...</p>
+        </div>
+      ) : error ? (
+        <div className="flex justify-center items-center py-20">
+          <p className="text-red-400 text-lg">{error}</p>
+        </div>
+      ) : (
+        <>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-[#111827] border-b border-[#243041]">
+                <tr>
+                  <th className="px-6 py-4 text-left text-xs uppercase text-gray-400">
+                    Batch ID
+                  </th>
 
-              <th className="px-6 py-4 text-left text-xs uppercase text-gray-400">
-                Created By
-              </th>
+                  <th className="px-6 py-4 text-left text-xs uppercase text-gray-400">
+                    Batch Name
+                  </th>
 
-              <th className="px-6 py-4 text-left text-xs uppercase text-gray-400">
-                Created Date
-              </th>
+                  <th className="px-6 py-4 text-left text-xs uppercase text-gray-400">
+                    Created By
+                  </th>
 
-              <th className="px-6 py-4 text-left text-xs uppercase text-gray-400">
-                Transactions
-              </th>
+                  <th className="px-6 py-4 text-left text-xs uppercase text-gray-400">
+                    Created Date
+                  </th>
 
-              <th className="px-6 py-4 text-left text-xs uppercase text-gray-400">
-                Status
-              </th>
+                  <th className="px-6 py-4 text-left text-xs uppercase text-gray-400">
+                    Transactions
+                  </th>
 
-              <th className="px-6 py-4 text-center text-xs uppercase text-gray-400">
-                Action
-              </th>
-            </tr>
-          </thead>
+                  <th className="px-6 py-4 text-left text-xs uppercase text-gray-400">
+                    Status
+                  </th>
 
-          <tbody>
-            {batchData.map((batch) => (
-              <BatchRow key={batch.batchId} batch={batch} />
-            ))}
-          </tbody>
-        </table>
-      </div>
+                  <th className="px-6 py-4 text-center text-xs uppercase text-gray-400">
+                    Action
+                  </th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {batches.length > 0 ? (
+                  batches.map((batch) => (
+                    <BatchRow key={batch._id} batch={batch} />
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={7} className="text-center py-12 text-gray-400">
+                      No batches found.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Pagination */}
+
+          {totalPages > 1 && (
+            <div className="flex justify-end items-center gap-3 px-6 py-4 border-t border-[#243041]">
+              <button
+                disabled={page === 1}
+                onClick={() => setPage((prev) => prev - 1)}
+                className="px-4 py-2 rounded-lg border border-[#243041] disabled:opacity-50"
+              >
+                Previous
+              </button>
+
+              <span className="text-gray-300">
+                Page {page} of {totalPages}
+              </span>
+
+              <button
+                disabled={page === totalPages}
+                onClick={() => setPage((prev) => prev + 1)}
+                className="px-4 py-2 rounded-lg border border-[#243041] disabled:opacity-50"
+              >
+                Next
+              </button>
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 }

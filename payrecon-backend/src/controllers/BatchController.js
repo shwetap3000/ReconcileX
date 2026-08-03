@@ -74,19 +74,16 @@ export const getBatches = async (req, res) => {
 
     switch (role) {
       case "ADMIN":
-        // Admin sees all batches
         query = {};
         break;
 
       case "MAKER":
-        // Maker sees only their own batches
         query = {
           createdBy: _id,
         };
         break;
 
       case "CHECKER":
-        // Checker sees batches that require review or have been reviewed
         query = {
           status: {
             $in: ["SUBMITTED", "UNDER_REVIEW", "APPROVED", "REJECTED"],
@@ -104,20 +101,7 @@ export const getBatches = async (req, res) => {
     const totalBatches = await Batch.countDocuments(query);
 
     const batches = await Batch.find(query)
-      .select(
-        `
-        batchId
-        batchName
-        status
-        createdByName
-        createdAt
-        matchedTransactions
-        amountMismatchCount
-        dateMismatchCount
-        missingInBankCount
-        missingInLedgerCount
-      `,
-      )
+      .populate("createdBy", "name email")
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
@@ -143,7 +127,28 @@ export const getBatches = async (req, res) => {
         (batch.missingInLedgerCount || 0);
 
       return {
-        ...batch,
+        _id: batch._id,
+        batchId: batch.batchId,
+        batchName: batch.batchName,
+        status: batch.status,
+
+        // Creator Information
+        createdBy: batch.createdBy?._id || null,
+        createdByName: batch.createdBy?.name || "N/A",
+        createdByEmail: batch.createdBy?.email || "",
+
+        // Dates
+        createdAt: batch.createdAt,
+        updatedAt: batch.updatedAt,
+
+        // Counts
+        matchedTransactions: batch.matchedTransactions || 0,
+        amountMismatchCount: batch.amountMismatchCount || 0,
+        dateMismatchCount: batch.dateMismatchCount || 0,
+        missingInBankCount: batch.missingInBankCount || 0,
+        missingInLedgerCount: batch.missingInLedgerCount || 0,
+
+        // Calculated Fields
         transactions,
         progress: progressMap[batch.status] || 0,
       };
@@ -157,6 +162,8 @@ export const getBatches = async (req, res) => {
       batches: formattedBatches,
     });
   } catch (error) {
+    console.error("Get Batches Error:", error);
+
     return res.status(500).json({
       success: false,
       message: error.message,

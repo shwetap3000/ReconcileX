@@ -25,9 +25,19 @@ function BatchRow({ batch }) {
 
       <td className="px-6 py-4">{batch.batchName}</td>
 
-      <td className="px-6 py-4 text-gray-300">{batch.createdBy}</td>
+      {/* Created By */}
+      <td className="px-6 py-4 text-gray-300">{batch.createdByName}</td>
 
-      <td className="px-6 py-4 text-gray-400">{batch.createdDate}</td>
+      {/* Created Date */}
+      <td className="px-6 py-4 text-gray-400">
+        {batch.createdAt
+          ? new Date(batch.createdAt).toLocaleDateString("en-GB", {
+              day: "2-digit",
+              month: "short",
+              year: "numeric",
+            })
+          : "-"}
+      </td>
 
       <td className="px-6 py-4">{batch.transactions.toLocaleString()}</td>
 
