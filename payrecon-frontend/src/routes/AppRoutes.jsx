@@ -14,6 +14,7 @@ import UploadFiles from "../pages/UploadFiles";
 import Reports from "../pages/Reports";
 import AuditTrail from "../pages/AuditTrail";
 import Approvals from "../pages/Approvals";
+import Batch from "../pages/Batch";
 import BatchDetail from "../pages/BatchDetail";
 import CreateUser from "../pages/CreateUser";
 import EditUser from "../pages/EditUser";
@@ -53,7 +54,7 @@ function AppRoutes() {
             <Route path="/audit" element={<AuditTrail />} />
             <Route path="/approvals" element={<Approvals />} />
             {/* <Route path="/batch/:id" element={<BatchDetail />} /> */}
-            <Route path="/batches" element={<BatchDetail />} />
+            <Route path="/batches" element={<Batch />} />
             <Route path="/my-profile" element={<MyProfile />} />
 
             <Route
