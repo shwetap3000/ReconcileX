@@ -1,21 +1,23 @@
-import BatchHeader from "../components/batchDetail/BatchHeader";
-import BatchStats from "../components/batchDetail/BatchStats";
-import ChartsSection from "../components/batchDetail/ChartsSection";
-import TransactionTable from "../components/batchDetail/TransactionTable";
-import Navbar from "../components/layout/Navbar";
+import BatchDetailHeader from "../components/batchDetail/BatchDetailHeader";
+import BatchInfoCard from "../components/batchDetail/BatchInfoCard";
+import UploadedFilesCard from "../components/batchDetail/UploadedFilesCard";
+import ReconciliationSummaryCard from "../components/batchDetail/ReconciliationSummaryCard";
+// import ActivityTimeline from "../components/batchDetail/ActivityTimeline";
 
 function BatchDetail() {
   return (
-    <div className="space-y-4">
-      <Navbar
-      title="May Reconciliation Batch 1"
-      subtitle="Batch summary and reconciliation status."
-      
-       />
-      <BatchHeader />
-      <BatchStats />
-      <ChartsSection />
-      <TransactionTable />
+    <div className="space-y-6">
+      <BatchDetailHeader />
+
+      <BatchInfoCard />
+
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        <UploadedFilesCard />
+
+        <ReconciliationSummaryCard />
+      </div>
+
+      {/* <ActivityTimeline /> */}
     </div>
   );
 }

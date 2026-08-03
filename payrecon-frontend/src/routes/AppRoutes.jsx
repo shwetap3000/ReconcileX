@@ -55,6 +55,7 @@ function AppRoutes() {
             <Route path="/approvals" element={<Approvals />} />
             {/* <Route path="/batch/:id" element={<BatchDetail />} /> */}
             <Route path="/batches" element={<Batch />} />
+            <Route path="/batche-detail" element={<BatchDetail />} />
             <Route path="/my-profile" element={<MyProfile />} />
 
             <Route
