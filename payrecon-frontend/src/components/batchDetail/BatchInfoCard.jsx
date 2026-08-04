@@ -1,6 +1,6 @@
 import StatusBadge from "./StatusBadge";
 
-function BatchInfoCard() {
+function BatchInfoCard({ batch }) {
   return (
     <div className="bg-[#141C28] border border-[#243041] rounded-2xl p-6">
       <h2 className="text-3xl font-semibold mb-6">1. Batch Information</h2>
@@ -14,7 +14,7 @@ function BatchInfoCard() {
               Batch Name
             </div>
 
-            <div className="px-6 py-5">May Reconciliation Batch 1</div>
+            <div className="px-6 py-5">{batch.batchName}</div>
           </div>
 
           <div className="grid grid-cols-2">
@@ -22,7 +22,9 @@ function BatchInfoCard() {
               Created Date
             </div>
 
-            <div className="px-6 py-5">May 14, 2026</div>
+            <div className="px-6 py-5">
+              {new Date(batch.createdAt).toLocaleDateString()}
+            </div>
           </div>
         </div>
 
@@ -34,15 +36,17 @@ function BatchInfoCard() {
               Batch ID
             </div>
 
-            <div className="px-6 py-5">BATCH-2026-0514-001</div>
+            <div className="px-6 py-5">{batch.batchId}</div>
           </div>
 
           <div className="grid grid-cols-2">
             <div className="px-6 py-5 border-r border-l border-[#243041] text-gray-400">
-              Reconciliation Date
+              Last Updated
             </div>
 
-            <div className="px-6 py-5">May 14, 2026</div>
+            <div className="px-6 py-5">
+              {new Date(batch.updatedAt).toLocaleDateString()}
+            </div>
           </div>
         </div>
 
@@ -54,7 +58,7 @@ function BatchInfoCard() {
               Created By
             </div>
 
-            <div className="px-6 py-5">Rahul Sharma</div>
+            <div className="px-6 py-5">{batch.createdByName}</div>
           </div>
 
           <div className="grid grid-cols-2">
@@ -63,7 +67,7 @@ function BatchInfoCard() {
             </div>
 
             <div className="px-6 py-5">
-              <StatusBadge status="Reconciled" />
+              <StatusBadge status={batch.status} />
             </div>
           </div>
         </div>
@@ -72,12 +76,10 @@ function BatchInfoCard() {
 
         <div className="grid grid-cols-4">
           <div className="px-6 py-5 border-r border-[#243041] text-gray-400">
-            Description
+            Remarks
           </div>
 
-          <div className="px-6 py-5 col-span-3">
-            HDFC May settlement reconciliation
-          </div>
+          <div className="px-6 py-5 col-span-3">{batch.remarks || "-"}</div>
         </div>
       </div>
     </div>

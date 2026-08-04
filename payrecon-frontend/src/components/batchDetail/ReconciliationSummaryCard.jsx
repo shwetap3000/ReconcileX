@@ -1,20 +1,24 @@
-import {
-  ArrowRight,
-  CheckCircle2,
-  AlertTriangle,
-  FileSpreadsheet,
-} from "lucide-react";
+import { ArrowRight, CheckCircle2 } from "lucide-react";
 
-function ReconciliationSummaryCard() {
+function ReconciliationSummaryCard({ summary }) {
+  const totalTransactions = summary?.totalLedgerTransactions || 0;
+
+  const exceptions =
+    (summary?.amountMismatch || 0) +
+    (summary?.dateMismatch || 0) +
+    (summary?.missingInBank || 0) +
+    (summary?.missingInLedger || 0);
+
+  const matchRate =
+    totalTransactions > 0
+      ? ((summary?.matched / totalTransactions) * 100).toFixed(1)
+      : 0;
+
   return (
     <div className="bg-[#141C28] border border-[#243041] rounded-2xl p-6 h-full">
       <h2 className="text-3xl font-semibold mb-6">3. Reconciliation Summary</h2>
 
-      {/* Summary Box */}
-
       <div className="border border-[#243041] rounded-xl overflow-hidden">
-        {/* Status */}
-
         <div className="flex justify-between items-center px-6 py-5 border-b border-[#243041]">
           <span className="text-gray-400">Status</span>
 
@@ -24,40 +28,32 @@ function ReconciliationSummaryCard() {
           </span>
         </div>
 
-        {/* Total */}
-
         <div className="flex justify-between items-center px-6 py-5 border-b border-[#243041]">
           <span className="text-gray-400">Total Transactions</span>
 
-          <span className="font-semibold">6,350</span>
+          <span className="font-semibold">{totalTransactions}</span>
         </div>
-
-        {/* Matched */}
 
         <div className="flex justify-between items-center px-6 py-5 border-b border-[#243041]">
           <span className="text-gray-400">Matched</span>
 
-          <span className="text-green-400 font-semibold">6,123</span>
+          <span className="text-green-400 font-semibold">
+            {summary?.matched}
+          </span>
         </div>
-
-        {/* Exceptions */}
 
         <div className="flex justify-between items-center px-6 py-5 border-b border-[#243041]">
           <span className="text-gray-400">Exceptions</span>
 
-          <span className="text-red-400 font-semibold">227</span>
+          <span className="text-red-400 font-semibold">{exceptions}</span>
         </div>
-
-        {/* Match Rate */}
 
         <div className="flex justify-between items-center px-6 py-5">
           <span className="text-gray-400">Match Rate</span>
 
-          <span className="font-semibold text-green-400">96.4%</span>
+          <span className="font-semibold text-green-400">{matchRate}%</span>
         </div>
       </div>
-
-      {/* Button */}
 
       <button
         className="
