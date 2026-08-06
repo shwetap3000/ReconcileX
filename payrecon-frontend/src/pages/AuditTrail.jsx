@@ -1,14 +1,44 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+
 import AuditFilters from "../components/audit/AuditFilters";
 import AuditTable from "../components/audit/AuditTable";
 import TodayActions from "../components/audit/TodayActions";
 import RecentActivity from "../components/audit/RecentActivity";
+
 import CustomDateButton from "../components/common/CustomDateButton";
 import DateRangeDropdown from "../components/common/DaysDropdown";
 import Navbar from "../components/layout/Navbar";
 import SearchBar from "../components/layout/SearchBar";
 
+import { getAuditLogs, getAuditStats } from "../api/auditApi";
+
 const AuditTrail = () => {
+  const [logs, setLogs] = useState([]);
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  const fetchAuditData = async () => {
+    try {
+      setLoading(true);
+
+      const [logsRes, statsRes] = await Promise.all([
+        getAuditLogs(),
+        getAuditStats(),
+      ]);
+
+      setLogs(logsRes.data.logs);
+      setStats(statsRes.data.stats);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAuditData();
+  }, []);
+
   return (
     <>
       <Navbar
@@ -22,21 +52,20 @@ const AuditTrail = () => {
           </>
         }
       />
+
       <div className="grid grid-cols-12 gap-6">
-        {/* Left Side */}
         <div className="col-span-9">
           <AuditFilters />
 
           <div className="mt-6">
-            <AuditTable />
+            <AuditTable logs={logs} loading={loading} />
           </div>
         </div>
 
-        {/* Right Side */}
         <div className="col-span-3 space-y-6">
-          <TodayActions />
+          <TodayActions stats={stats} loading={loading} />
 
-          <RecentActivity />
+          <RecentActivity logs={logs} loading={loading} />
         </div>
       </div>
     </>

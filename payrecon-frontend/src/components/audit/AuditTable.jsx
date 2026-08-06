@@ -1,8 +1,23 @@
 import { AuditColumns } from "./AuditColumns";
-import { auditData } from "../../constants/auditData";
 import AuditRow from "./AuditRow";
 
-function AuditTable() {
+function AuditTable({ logs, loading }) {
+  if (loading) {
+    return (
+      <div className="bg-[#141C28] border border-[#243041] rounded-2xl p-10 text-center text-gray-400">
+        Loading audit logs...
+      </div>
+    );
+  }
+
+  if (!logs.length) {
+    return (
+      <div className="bg-[#141C28] border border-[#243041] rounded-2xl p-10 text-center text-gray-400">
+        No audit logs found.
+      </div>
+    );
+  }
+
   return (
     <div className="bg-[#141C28] border border-[#243041] rounded-2xl overflow-hidden">
       <table className="w-full">
@@ -20,8 +35,8 @@ function AuditTable() {
         </thead>
 
         <tbody>
-          {auditData.map((row) => (
-            <AuditRow key={row.id} row={row} columns={AuditColumns} />
+          {logs.map((row) => (
+            <AuditRow key={row._id} row={row} columns={AuditColumns} />
           ))}
         </tbody>
       </table>

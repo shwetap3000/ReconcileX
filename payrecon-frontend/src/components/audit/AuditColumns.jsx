@@ -1,55 +1,95 @@
-import { CheckCircle2, AlertTriangle, Info, ChevronRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 
 const StatusBadge = ({ status }) => {
   const styles = {
-    Success: "bg-green-500/15 text-green-400 border border-green-500/20",
-    Warning: "bg-yellow-500/15 text-yellow-400 border border-yellow-500/20",
-    Info: "bg-blue-500/15 text-blue-400 border border-blue-500/20",
+    SUCCESS: "bg-green-500/15 text-green-400 border border-green-500/20",
+    FAILED: "bg-red-500/15 text-red-400 border border-red-500/20",
   };
 
   return (
     <span
-      className={`px-3 py-1 rounded-lg text-sm font-medium ${styles[status]}`}
+      className={`px-3 py-1 rounded-lg text-sm font-medium ${
+        styles[status] ||
+        "bg-gray-500/15 text-gray-300 border border-gray-500/20"
+      }`}
     >
       {status}
     </span>
   );
 };
 
+const actionLabels = {
+  LOGIN: "Login",
+  LOGOUT: "Logout",
+
+  USER_CREATED: "User Created",
+  USER_UPDATED: "User Updated",
+  USER_ACTIVATED: "User Activated",
+  USER_DEACTIVATED: "User Deactivated",
+  USER_ROLE_UPDATED: "User Role Updated",
+
+  BATCH_CREATED: "Batch Created",
+  BATCH_UPDATED: "Batch Updated",
+  BATCH_DELETED: "Batch Deleted",
+  BATCH_SUBMITTED: "Batch Submitted",
+  BATCH_APPROVED: "Batch Approved",
+  BATCH_REJECTED: "Batch Rejected",
+  BATCH_RESUBMITTED: "Batch Resubmitted",
+
+  LEDGER_UPLOADED: "Ledger Uploaded",
+  BANK_UPLOADED: "Bank Uploaded",
+  LEDGER_REPLACED: "Ledger Replaced",
+  BANK_REPLACED: "Bank Replaced",
+
+  REVIEW_COMMENT_ADDED: "Review Comment Added",
+
+  PROFILE_UPDATED: "Profile Updated",
+  PASSWORD_CHANGED: "Password Changed",
+
+  REPORT_DOWNLOADED: "Report Downloaded",
+
+  RECONCILIATION_STARTED: "Reconciliation Started",
+  RECONCILIATION_COMPLETED: "Reconciliation Completed",
+  RECONCILIATION_FAILED: "Reconciliation Failed",
+};
+
 export const AuditColumns = [
   {
-    header: "Time",
-    accessor: "time",
+  header: "Time",
+  accessor: "createdAt",
 
-    render: (row) => {
-      const [date, time] = row.time.split("\n");
+  render: (row) => {
+    const date = new Date(row.createdAt);
 
-      return (
-        <div>
-          <p className="text-white">{date}</p>
-          <p className="text-gray-400 text-sm mt-1">{time}</p>
-        </div>
-      );
-    },
+    return (
+      <div>
+        <p className="text-white">
+          {date.toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+            year: "numeric",
+          })}
+        </p>
+
+        <p className="text-gray-400 text-sm mt-1">
+          {date.toLocaleTimeString([], {
+            hour: "numeric",
+            minute: "2-digit",
+          })}
+        </p>
+      </div>
+    );
   },
-
+},
   {
     header: "User",
-    accessor: "user",
+    accessor: "performedBy",
 
     render: (row) => (
-      <div className="flex items-center gap-3">
-        <img
-          src={row.user.avatar}
-          alt={row.user.name}
-          className="w-10 h-10 rounded-full"
-        />
+      <div>
+        <p className="text-white font-medium">{row.performedBy?.name || "-"}</p>
 
-        <div>
-          <p className="text-white">{row.user.name}</p>
-
-          <p className="text-gray-400 text-sm">{row.user.role}</p>
-        </div>
+        <p className="text-gray-400 text-sm">{row.role}</p>
       </div>
     ),
   },
@@ -60,20 +100,22 @@ export const AuditColumns = [
 
     render: (row) => (
       <div>
-        <p className="text-white">{row.action.title}</p>
+        <p className="text-white font-medium">
+          {actionLabels[row.action] || row.action}
+        </p>
 
-        <p className="text-gray-400 text-sm mt-1">{row.action.description}</p>
+        <p className="text-gray-400 text-sm mt-1">{row.description}</p>
       </div>
     ),
   },
 
   {
     header: "Batch",
-    accessor: "batch",
+    accessor: "batchId",
 
     render: (row) => (
-      <span className="text-[#4F6BFF] cursor-pointer hover:underline">
-        {row.batch}
+      <span className="text-[#4F6BFF] hover:underline cursor-pointer">
+        {row.batchId?.batchId || "-"}
       </span>
     ),
   },
@@ -87,12 +129,14 @@ export const AuditColumns = [
 
   {
     header: "",
-
     accessor: "arrow",
 
     render: () => (
       <button className="flex justify-center w-full">
-        <ChevronRight size={20} className="text-gray-500" />
+        <ChevronRight
+          size={20}
+          className="text-gray-500 hover:text-white transition"
+        />
       </button>
     ),
   },
