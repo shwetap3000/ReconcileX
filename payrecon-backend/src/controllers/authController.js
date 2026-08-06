@@ -1,14 +1,13 @@
 import User from "../models/User.js";
 import generateToken from "../utils/generateToken.js";
+import { createAuditLog } from "../services/auditService.js";
 
 // registration controller
 export const register = async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
 
-    const existingUser = await User.findOne({
-      email,
-    });
+    const existingUser = await User.findOne({ email });
 
     if (existingUser) {
       return res.status(400).json({
@@ -24,6 +23,19 @@ export const register = async (req, res) => {
       role,
       mustChangePassword: true,
       createdBy: req.user._id,
+    });
+
+    await createAuditLog({
+      action: "USER_CREATED",
+      description: `Created user ${user.name} (${user.role})`,
+      performedBy: req.user._id,
+      role: req.user.role,
+      metadata: {
+        createdUserId: user._id,
+        createdUserEmail: user.email,
+        createdUserRole: user.role,
+      },
+      req,
     });
 
     return res.status(201).json({
@@ -79,6 +91,14 @@ export const login = async (req, res) => {
     user.lastLogin = new Date();
     await user.save();
 
+    await createAuditLog({
+      action: "LOGIN",
+      description: `${user.name} logged into the system`,
+      performedBy: user._id,
+      role: user.role,
+      req,
+    });
+
     const token = generateToken(user._id);
 
     res.cookie("token", token, {
@@ -107,7 +127,7 @@ export const login = async (req, res) => {
   }
 };
 
-// to get the user profile
+// get profile
 export const getMe = async (req, res) => {
   try {
     const user = await User.findById(req.user._id)
@@ -135,6 +155,14 @@ export const getMe = async (req, res) => {
 
 // logout controller
 export const logout = async (req, res) => {
+  await createAuditLog({
+    action: "LOGOUT",
+    description: `${req.user.name} logged out`,
+    performedBy: req.user._id,
+    role: req.user.role,
+    req,
+  });
+
   res.clearCookie("token");
 
   res.status(200).json({
@@ -143,12 +171,11 @@ export const logout = async (req, res) => {
   });
 };
 
-// Change Password Controller
+// change password
 export const changePassword = async (req, res) => {
   try {
     const { currentPassword, newPassword, confirmPassword } = req.body;
 
-    // Check if all fields are provided
     if (!currentPassword || !newPassword || !confirmPassword) {
       return res.status(400).json({
         success: false,
@@ -156,7 +183,6 @@ export const changePassword = async (req, res) => {
       });
     }
 
-    // Get logged-in user
     const user = await User.findById(req.user._id);
 
     if (!user) {
@@ -166,7 +192,6 @@ export const changePassword = async (req, res) => {
       });
     }
 
-    // Verify current password
     const isMatch = await user.comparePassword(currentPassword);
 
     if (!isMatch) {
@@ -176,7 +201,6 @@ export const changePassword = async (req, res) => {
       });
     }
 
-    // Check if new password and confirm password match
     if (newPassword !== confirmPassword) {
       return res.status(400).json({
         success: false,
@@ -184,7 +208,6 @@ export const changePassword = async (req, res) => {
       });
     }
 
-    // Prevent using the same password
     const isSamePassword = await user.comparePassword(newPassword);
 
     if (isSamePassword) {
@@ -194,13 +217,18 @@ export const changePassword = async (req, res) => {
       });
     }
 
-    // Update password
     user.password = newPassword;
-
-    // User no longer needs to change password
     user.mustChangePassword = false;
 
     await user.save();
+
+    await createAuditLog({
+      action: "PASSWORD_CHANGED",
+      description: `${user.name} changed password`,
+      performedBy: user._id,
+      role: user.role,
+      req,
+    });
 
     return res.status(200).json({
       success: true,

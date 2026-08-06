@@ -11,7 +11,7 @@ import validateBank from "../services/validateBank.js";
 import BankTransaction from "../models/BankTransaction.js";
 import LedgerTransaction from "../models/LedgerTransaction.js";
 import reconcileTransactions from "../services/reconcileTransactions.js";
-import createAuditLog from "../utils/auditLogger.js";
+import { createAuditLog } from "../services/auditService.js";
 
 // to create a new batch
 export const createBatch = async (req, res) => {
@@ -37,14 +37,11 @@ export const createBatch = async (req, res) => {
     });
 
     await createAuditLog({
-      action: "CREATE_BATCH",
-
+      action: "BATCH_CREATED",
       description: `Created batch ${batch.batchId}`,
-
-      user: req.user,
-
+      performedBy: req.user._id,
+      role: req.user.role,
       batchId: batch._id,
-
       req,
     });
 
@@ -306,14 +303,15 @@ export const uploadLedgerFile = async (req, res) => {
     fs.unlinkSync(req.file.path);
 
     await createAuditLog({
-      action: "UPLOAD_LEDGER",
-
-      description: `Uploaded ledger file (${req.file.originalname}) for batch ${batch.batchId}`,
-
-      user: req.user,
-
+      action: "LEDGER_UPLOADED",
+      description: `Uploaded ledger file (${req.file.originalname})`,
+      performedBy: req.user._id,
+      role: req.user.role,
       batchId: batch._id,
-
+      metadata: {
+        fileName: req.file.originalname,
+        totalTransactions: ledgerTransactions.length,
+      },
       req,
     });
 
@@ -434,14 +432,15 @@ export const uploadBankFile = async (req, res) => {
     }
 
     await createAuditLog({
-      action: "UPLOAD_BANK",
-
-      description: `Uploaded bank file (${req.file.originalname}) for batch ${batch.batchId}`,
-
-      user: req.user,
-
+      action: "BANK_UPLOADED",
+      description: `Uploaded bank file (${req.file.originalname})`,
+      performedBy: req.user._id,
+      role: req.user.role,
       batchId: batch._id,
-
+      metadata: {
+        fileName: req.file.originalname,
+        totalTransactions: bankTransactions.length,
+      },
       req,
     });
 
@@ -476,14 +475,11 @@ export const reconcileBatch = async (req, res) => {
     const result = await reconcileTransactions(batchId);
 
     await createAuditLog({
-      action: "START_RECONCILIATION",
-
+      action: "RECONCILIATION_STARTED",
       description: `Started reconciliation for batch ${batch.batchId}`,
-
-      user: req.user,
-
+      performedBy: req.user._id,
+      role: req.user.role,
       batchId: batch._id,
-
       req,
     });
 
@@ -664,14 +660,11 @@ export const submitBatch = async (req, res) => {
     await batch.save();
 
     await createAuditLog({
-      action: "SUBMIT_BATCH",
-
-      description: `Submitted batch ${batch.batchId} for checker review`,
-
-      user: req.user,
-
+      action: "BATCH_SUBMITTED",
+      description: `Submitted batch ${batch.batchId} for review`,
+      performedBy: req.user._id,
+      role: req.user.role,
       batchId: batch._id,
-
       req,
     });
 
@@ -747,14 +740,11 @@ export const approveBatch = async (req, res) => {
     await batch.save();
 
     await createAuditLog({
-      action: "APPROVE_BATCH",
-
+      action: "BATCH_APPROVED",
       description: `Approved batch ${batch.batchId}`,
-
-      user: req.user,
-
+      performedBy: req.user._id,
+      role: req.user.role,
       batchId: batch._id,
-
       req,
     });
 
@@ -812,17 +802,16 @@ export const rejectBatch = async (req, res) => {
     await batch.save();
 
     await createAuditLog({
-      action: "REJECT_BATCH",
-
-      description: `Rejected batch ${batch.batchId}. Remarks: ${remarks}`,
-
-      user: req.user,
-
+      action: "BATCH_REJECTED",
+      description: `Rejected batch ${batch.batchId}`,
+      performedBy: req.user._id,
+      role: req.user.role,
       batchId: batch._id,
-
+      metadata: {
+        remarks,
+      },
       req,
     });
-
     return res.status(200).json({
       success: true,
       message: "Batch rejected successfully.",
@@ -875,14 +864,11 @@ export const resubmitBatch = async (req, res) => {
     await batch.save();
 
     await createAuditLog({
-      action: "RESUBMIT_BATCH",
-
-      description: `Resubmitted batch ${batch.batchId} after corrections`,
-
-      user: req.user,
-
+      action: "BATCH_RESUBMITTED",
+      description: `Resubmitted batch ${batch.batchId}`,
+      performedBy: req.user._id,
+      role: req.user.role,
       batchId: batch._id,
-
       req,
     });
 
