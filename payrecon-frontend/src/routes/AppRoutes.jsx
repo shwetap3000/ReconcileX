@@ -20,6 +20,7 @@ import CreateUser from "../pages/CreateUser";
 import EditUser from "../pages/EditUser";
 import MyProfile from "../pages/Myprofile";
 import Unauthorized from "../pages/Unauthorized";
+import Users from "../pages/Users";
 
 import Login from "../pages/Login";
 import ForgotPassword from "../pages/ForgotPassword";
@@ -27,6 +28,7 @@ import ResetPassword from "../pages/ResetPassword";
 
 import { ROLES } from "../constants/roles";
 import ChangePassword from "../pages/ChangePassword";
+import { User } from "lucide-react";
 
 function AppRoutes() {
   return (
@@ -57,6 +59,7 @@ function AppRoutes() {
             <Route path="/batches" element={<Batch />} />
             {/* <Route path="/batche-detail" element={<BatchDetail />} /> */}
             <Route path="/my-profile" element={<MyProfile />} />
+            <Route path="/users" element={<Users />} />
 
             <Route
               element={<RoleProtectedRoute allowedRoles={[ROLES.ADMIN]} />}
