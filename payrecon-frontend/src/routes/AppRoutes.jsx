@@ -21,6 +21,7 @@ import EditUser from "../pages/EditUser";
 import MyProfile from "../pages/Myprofile";
 import Unauthorized from "../pages/Unauthorized";
 import Users from "../pages/Users";
+import UserDetailsPage from "../pages/UserDetailsPage";
 
 import Login from "../pages/Login";
 import ForgotPassword from "../pages/ForgotPassword";
@@ -60,6 +61,9 @@ function AppRoutes() {
             {/* <Route path="/batche-detail" element={<BatchDetail />} /> */}
             <Route path="/my-profile" element={<MyProfile />} />
             <Route path="/users" element={<Users />} />
+            {/* <Route path="/users/:id" element={<UserDetailsPage />} /> */}
+            <Route path="/user-detail" element={<UserDetailsPage />} />
+            
 
             <Route
               element={<RoleProtectedRoute allowedRoles={[ROLES.ADMIN]} />}
