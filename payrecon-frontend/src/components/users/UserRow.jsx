@@ -1,11 +1,11 @@
 import { useNavigate } from "react-router-dom";
 
-function UserRow({ user, columns }) {
+function UserRow({ user, columns, refreshUsers }) {
   const navigate = useNavigate();
 
   return (
     <tr
-      onClick={() => navigate(`/users/${user.id}`)}
+      onClick={() => navigate(`/users/${user._id}`)}
       className="border-b border-[#243041] hover:bg-[#182233] transition cursor-pointer"
     >
       {columns.map((column) => (
@@ -18,7 +18,9 @@ function UserRow({ user, columns }) {
             }
           }}
         >
-          {column.render ? column.render(user) : user[column.accessor]}
+          {column.render
+            ? column.render(user, refreshUsers)
+            : user[column.accessor]}
         </td>
       ))}
     </tr>

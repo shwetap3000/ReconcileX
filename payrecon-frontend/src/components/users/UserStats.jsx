@@ -1,12 +1,19 @@
 import { Users, ShieldCheck, UserCog, UserCheck } from "lucide-react";
 
-import { usersData } from "../../constants/usersData";
+function UserStats({ users = [] }) {
+  const totalUsers = users.length;
 
-function UserStats() {
-  const totalUsers = usersData.length;
-  const admins = usersData.filter((u) => u.role === "ADMIN").length;
-  const makers = usersData.filter((u) => u.role === "MAKER").length;
-  const checkers = usersData.filter((u) => u.role === "CHECKER").length;
+  const admins = users.filter(
+    (user) => user.role?.toUpperCase() === "ADMIN",
+  ).length;
+
+  const makers = users.filter(
+    (user) => user.role?.toUpperCase() === "MAKER",
+  ).length;
+
+  const checkers = users.filter(
+    (user) => user.role?.toUpperCase() === "CHECKER",
+  ).length;
 
   const cards = [
     {
@@ -40,7 +47,7 @@ function UserStats() {
   ];
 
   return (
-    <div className="grid grid-cols-4 gap-6 mb-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mt-6">
       {cards.map((card) => {
         const Icon = card.icon;
 
@@ -53,7 +60,9 @@ function UserStats() {
               <div>
                 <p className="text-gray-400 text-sm">{card.title}</p>
 
-                <h2 className="text-3xl font-bold mt-2">{card.value}</h2>
+                <h2 className="text-3xl font-bold mt-2 text-white">
+                  {card.value}
+                </h2>
               </div>
 
               <div

@@ -1,13 +1,13 @@
-import { UserColumns } from "./UserColumns";
-import UserRow from "./UserRow";
-import { usersData } from "../../constants/usersData";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-function UserTable() {
+import { UserColumns } from "./UserColumns";
+import UserRow from "./UserRow";
+
+function UserTable({ users, loading, refreshUsers }) {
   return (
-    <div className="bg-[#141C28] border border-[#243041] rounded-2xl overflow-hidden">
+    <div className="bg-[#0F1723] rounded-2xl border border-[#243041] overflow-hidden">
       <div className="px-6 py-5 border-b border-[#243041]">
-        <h2 className="text-xl font-semibold">User Directory</h2>
+        <h2 className="text-xl font-semibold text-white">User Directory</h2>
 
         <p className="text-gray-400 mt-1">View and manage all system users</p>
       </div>
@@ -27,19 +27,47 @@ function UserTable() {
         </thead>
 
         <tbody>
-          {usersData.map((user) => (
-            <UserRow key={user.id} user={user} columns={UserColumns} />
-          ))}
+          {loading ? (
+            <tr>
+              <td
+                colSpan={UserColumns.length}
+                className="py-10 text-center text-gray-400"
+              >
+                Loading users...
+              </td>
+            </tr>
+          ) : users.length === 0 ? (
+            <tr>
+              <td
+                colSpan={UserColumns.length}
+                className="py-10 text-center text-gray-400"
+              >
+                No users found.
+              </td>
+            </tr>
+          ) : (
+            users.map((user) => (
+              <UserRow
+                key={user._id}
+                user={user}
+                columns={UserColumns}
+                refreshUsers={refreshUsers}
+              />
+            ))
+          )}
         </tbody>
       </table>
 
       <div className="flex items-center justify-between px-6 py-5 border-t border-[#243041]">
         <p className="text-sm text-gray-400">
-          Showing 1 to {usersData.length} of {usersData.length} users
+          Showing {users.length} user{users.length !== 1 ? "s" : ""}
         </p>
 
         <div className="flex items-center gap-2">
-          <button className="w-10 h-10 rounded-lg border border-[#243041] flex items-center justify-center">
+          <button
+            disabled
+            className="w-10 h-10 rounded-lg border border-[#243041] flex items-center justify-center opacity-50 cursor-not-allowed"
+          >
             <ChevronLeft size={18} />
           </button>
 
@@ -47,7 +75,10 @@ function UserTable() {
             1
           </button>
 
-          <button className="w-10 h-10 rounded-lg border border-[#243041] flex items-center justify-center">
+          <button
+            disabled
+            className="w-10 h-10 rounded-lg border border-[#243041] flex items-center justify-center opacity-50 cursor-not-allowed"
+          >
             <ChevronRight size={18} />
           </button>
         </div>
