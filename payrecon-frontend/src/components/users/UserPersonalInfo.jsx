@@ -7,7 +7,7 @@ const UserPersonalInfo = ({ user }) => {
   const rows = [
     {
       label: "Full Name",
-      value: user.fullName,
+      value: user.name,
     },
     {
       label: "Email",
@@ -19,7 +19,7 @@ const UserPersonalInfo = ({ user }) => {
     },
     {
       label: "Status",
-      value: <UserStatusBadge status={user.status} />,
+      value: <UserStatusBadge status={user.isActive ? "ACTIVE" : "INACTIVE"} />,
     },
     {
       label: "Created By",
@@ -47,7 +47,7 @@ const UserPersonalInfo = ({ user }) => {
     },
     {
       label: "Account ID",
-      value: user.userId,
+      value: user.id,
     },
   ];
 

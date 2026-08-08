@@ -1,32 +1,52 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+
 import UserDetails from "../components/users/UserDetails";
-
-const dummyUser = {
-  initials: "RA",
-  fullName: "Rahul Awasthi",
-  email: "rahul.awasthi@reconcilx.com",
-  role: "Admin",
-  status: "Active",
-  userId: "USR-00024",
-  activeSince: "28 Jun 2025",
-
-  createdBy: "Shweta (Admin)",
-  createdAt: "28 Jun 2025, 09:15 AM",
-  lastLogin: "06 Aug 2025, 10:24 AM",
-  mustChangePassword: false,
-
-  totalBatches: 48,
-  totalApprovals: 126,
-  totalRejections: 4,
-
-  lastActivity: "Approved Batch BATCH-2026-007",
-  passwordChangedAt: "15 Jul 2025",
-
-  activities: [],
-};
+import { getUserById } from "../api/userApi";
 
 const UserDetailsPage = () => {
-  return <UserDetails user={dummyUser} />;
+  const { id } = useParams();
+
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  const fetchUser = async () => {
+    try {
+      setLoading(true);
+
+      const response = await getUserById(id);
+
+      if (response.success) {
+        setUser(response.user);
+      }
+    } catch (error) {
+      console.error("Error fetching user details:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUser();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-[70vh] text-white">
+        Loading user details...
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center h-[70vh] text-red-400">
+        User not found.
+      </div>
+    );
+  }
+
+  return <UserDetails user={user} />;
 };
 
 export default UserDetailsPage;

@@ -8,11 +8,30 @@ import {
   Pencil,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+
 import UserRoleBadge from "./UserRoleBadge";
 import UserStatusBadge from "./UserStatusBadge";
 
+const formatDate = (date) => {
+  if (!date) return "--";
+
+  return new Date(date).toLocaleString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+};
+
 const UserHeader = ({ user }) => {
   const navigate = useNavigate();
+
+  const initials = user.name
+    ? user.name
+        .split(" ")
+        .map((word) => word[0])
+        .join("")
+        .toUpperCase()
+    : "U";
 
   return (
     <>
@@ -22,7 +41,7 @@ const UserHeader = ({ user }) => {
         className="flex items-center gap-2 text-gray-400 hover:text-white transition mb-3"
       >
         <ArrowLeft size={18} />
-        <span>Users</span>
+        Users
       </button>
 
       {/* Title */}
@@ -42,7 +61,7 @@ const UserHeader = ({ user }) => {
 
           <button className="flex items-center gap-2 border border-gray-700 hover:border-gray-500 px-5 py-3 rounded-xl text-white transition">
             <Power size={18} />
-            Deactivate User
+            {user.isActive ? "Deactivate User" : "Activate User"}
           </button>
         </div>
       </div>
@@ -54,31 +73,29 @@ const UserHeader = ({ user }) => {
           <div className="flex items-center gap-6">
             {/* Avatar */}
             <div className="h-24 w-24 rounded-full bg-gradient-to-br from-purple-500 to-indigo-700 flex items-center justify-center text-white text-4xl font-bold">
-              {user.initials}
+              {initials}
             </div>
 
             {/* User Info */}
             <div>
               <div className="flex items-center gap-3 flex-wrap">
-                <h2 className="text-3xl font-bold text-white">
-                  {user.fullName}
-                </h2>
+                <h2 className="text-3xl font-bold text-white">{user.name}</h2>
 
                 <UserRoleBadge role={user.role} />
 
-                <UserStatusBadge status={user.status} />
+                <UserStatusBadge
+                  status={user.isActive ? "ACTIVE" : "INACTIVE"}
+                />
               </div>
 
               <div className="flex items-center gap-3 mt-4 text-gray-400">
                 <Mail size={18} />
-
                 <span>{user.email}</span>
               </div>
             </div>
           </div>
 
           {/* Right */}
-
           <div className="border-l border-gray-700 pl-10">
             <div className="flex items-start gap-3 mb-5">
               <Calendar size={18} className="text-gray-400 mt-1" />
@@ -86,7 +103,7 @@ const UserHeader = ({ user }) => {
               <div>
                 <p className="text-sm text-gray-400">User ID</p>
 
-                <p className="text-white font-semibold">{user.userId}</p>
+                <p className="text-white font-semibold">{user._id}</p>
               </div>
             </div>
 
@@ -96,8 +113,12 @@ const UserHeader = ({ user }) => {
               <div>
                 <p className="text-sm text-gray-400">Account Status</p>
 
-                <p className="text-green-400">
-                  Active since {user.activeSince}
+                <p
+                  className={user.isActive ? "text-green-400" : "text-red-400"}
+                >
+                  {user.isActive
+                    ? `Active since ${formatDate(user.createdAt)}`
+                    : "Inactive"}
                 </p>
               </div>
             </div>

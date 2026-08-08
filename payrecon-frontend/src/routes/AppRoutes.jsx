@@ -61,8 +61,8 @@ function AppRoutes() {
             {/* <Route path="/batche-detail" element={<BatchDetail />} /> */}
             <Route path="/my-profile" element={<MyProfile />} />
             <Route path="/users" element={<Users />} />
-            {/* <Route path="/users/:id" element={<UserDetailsPage />} /> */}
-            <Route path="/user-detail" element={<UserDetailsPage />} />
+            <Route path="/users/:id" element={<UserDetailsPage />} />
+            {/* <Route path="/user-detail" element={<UserDetailsPage />} /> */}
             
 
             <Route
