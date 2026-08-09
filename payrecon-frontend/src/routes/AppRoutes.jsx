@@ -62,8 +62,6 @@ function AppRoutes() {
             <Route path="/my-profile" element={<MyProfile />} />
             <Route path="/users" element={<Users />} />
             <Route path="/users/:id" element={<UserDetailsPage />} />
-            {/* <Route path="/user-detail" element={<UserDetailsPage />} /> */}
-            
 
             <Route
               element={<RoleProtectedRoute allowedRoles={[ROLES.ADMIN]} />}

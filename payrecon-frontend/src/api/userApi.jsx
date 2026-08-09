@@ -1,5 +1,10 @@
 import api from "./axios";
 
+export const createUser = async (userData) => {
+  const { data } = await api.post("/auth/register", userData);
+  return data;
+};
+
 export const getUsers = async () => {
   const { data } = await api.get("/users");
   return data;
