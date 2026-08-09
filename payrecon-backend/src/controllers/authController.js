@@ -5,8 +5,20 @@ import { createAuditLog } from "../services/auditService.js";
 // registration controller
 export const register = async (req, res) => {
   try {
-    const { name, email, password, role } = req.body;
+    const {
+      employeeId,
+      name,
+      email,
+      phone,
+      department,
+      designation,
+      username,
+      password,
+      role,
+      isActive,
+    } = req.body;
 
+    // Check existing email
     const existingUser = await User.findOne({ email });
 
     if (existingUser) {
@@ -16,15 +28,47 @@ export const register = async (req, res) => {
       });
     }
 
+    // Check existing employee ID (if provided)
+    if (employeeId) {
+      const existingEmployee = await User.findOne({ employeeId });
+
+      if (existingEmployee) {
+        return res.status(400).json({
+          success: false,
+          message: "Employee ID already exists",
+        });
+      }
+    }
+
+    // Check existing username (if provided)
+    if (username) {
+      const existingUsername = await User.findOne({ username });
+
+      if (existingUsername) {
+        return res.status(400).json({
+          success: false,
+          message: "Username already exists",
+        });
+      }
+    }
+
+    // Create user
     const user = await User.create({
+      employeeId,
       name,
       email,
+      phone,
+      department,
+      designation,
+      username,
       password,
       role,
+      isActive: isActive ?? true,
       mustChangePassword: true,
       createdBy: req.user._id,
     });
 
+    // Audit Log
     await createAuditLog({
       action: "USER_CREATED",
       description: `Created user ${user.name} (${user.role})`,
@@ -43,18 +87,27 @@ export const register = async (req, res) => {
       message: "User created successfully",
       user: {
         id: user._id,
+        employeeId: user.employeeId,
         name: user.name,
         email: user.email,
+        phone: user.phone,
+        department: user.department,
+        designation: user.designation,
+        username: user.username,
         role: user.role,
+        isActive: user.isActive,
+        mustChangePassword: user.mustChangePassword,
+        createdBy: user.createdBy,
+        createdAt: user.createdAt,
       },
     });
   } catch (error) {
-    res.status(500).json({
+    console.error("Register Error:", error);
+
+    return res.status(500).json({
       success: false,
       message: error.message,
     });
-
-    console.log(error.message);
   }
 };
 

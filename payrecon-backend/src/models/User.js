@@ -70,6 +70,30 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+
+    department: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+
+    designation: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+
+    username: {
+      type: String,
+      unique: true,
+      sparse: true,
+      trim: true,
+    },
+
+    passwordChangedAt: {
+      type: Date,
+      default: null,
+    },
   },
   {
     timestamps: true,
