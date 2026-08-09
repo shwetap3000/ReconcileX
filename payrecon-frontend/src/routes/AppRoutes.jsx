@@ -67,7 +67,7 @@ function AppRoutes() {
               element={<RoleProtectedRoute allowedRoles={[ROLES.ADMIN]} />}
             >
               <Route path="/create-user" element={<CreateUser />} />
-              <Route path="/edit-user" element={<EditUser />} />
+              <Route path="/edit-user/:id" element={<EditUser />} />
             </Route>
           </Route>
         </Route>

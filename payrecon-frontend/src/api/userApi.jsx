@@ -15,6 +15,11 @@ export const getUserById = async (id) => {
   return data;
 };
 
+export const updateUser = async (id, userData) => {
+  const { data } = await api.patch(`/users/update-user/${id}`, userData);
+  return data;
+};
+
 export const updateUserStatus = async (id, isActive) => {
   const { data } = await api.patch(`/users/${id}/status`, {
     isActive,

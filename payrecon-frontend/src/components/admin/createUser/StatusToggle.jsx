@@ -1,4 +1,4 @@
-const StatusToggle = ({ active, setActive }) => {
+const StatusToggle = ({ active, onChange }) => {
   return (
     <div>
       <p className="mb-2 text-sm font-medium text-slate-300">Status</p>
@@ -6,7 +6,7 @@ const StatusToggle = ({ active, setActive }) => {
       <div className="flex w-fit rounded-full bg-[#050C17] border border-slate-700 p-1">
         <button
           type="button"
-          onClick={() => setActive(true)}
+          onClick={() => onChange(true)}
           className={`rounded-full px-6 py-2 transition ${
             active
               ? "bg-blue-600 text-white"
@@ -18,7 +18,7 @@ const StatusToggle = ({ active, setActive }) => {
 
         <button
           type="button"
-          onClick={() => setActive(false)}
+          onClick={() => onChange(false)}
           className={`rounded-full px-6 py-2 transition ${
             !active
               ? "bg-blue-600 text-white"
