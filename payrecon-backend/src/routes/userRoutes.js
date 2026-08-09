@@ -4,6 +4,7 @@ import {
   getUserById,
   updateUserRole,
   updateUserStatus,
+  updateUser,
 } from "../controllers/userController.js";
 import { protect } from "../middleware/authMiddleware.js";
 import { authorizeRoles } from "../middleware/authorizeRoles.js";
@@ -14,5 +15,6 @@ router.get("/", protect, authorizeRoles("ADMIN"), getAllUsers);
 router.get("/:id", protect, authorizeRoles("ADMIN"), getUserById);
 router.patch("/:id/role", protect, authorizeRoles("ADMIN"), updateUserRole);
 router.patch("/:id/status", protect, authorizeRoles("ADMIN"), updateUserStatus);
+router.patch("/update-user/:id", protect, authorizeRoles("ADMIN"), updateUser);
 
 export default router;
