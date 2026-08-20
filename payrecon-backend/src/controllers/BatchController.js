@@ -12,6 +12,8 @@ import BankTransaction from "../models/BankTransaction.js";
 import LedgerTransaction from "../models/LedgerTransaction.js";
 import reconcileTransactions from "../services/reconcileTransactions.js";
 import { createAuditLog } from "../services/auditService.js";
+import crypto from "crypto";
+import IngestionJob from "../models/IngestionJob.js";
 
 // to create a new batch
 export const createBatch = async (req, res) => {
@@ -228,7 +230,31 @@ export const uploadLedgerFile = async (req, res) => {
       });
     }
 
-    // Prevent duplicate ledger uploads
+    // 1. Generate SHA-256 checksum
+    const fileBuffer = fs.readFileSync(req.file.path);
+
+    const checksum = crypto
+      .createHash("sha256")
+      .update(fileBuffer)
+      .digest("hex");
+
+    // 2. Check duplicate file
+    const existingFile = await BatchFile.findOne({
+      batchId: batch._id,
+      fileType: "LEDGER",
+      checksum,
+      isActive: true,
+    });
+
+    if (existingFile) {
+      return res.status(409).json({
+        success: false,
+        message:
+          "This exact Ledger file has already been uploaded for this batch.",
+      });
+    }
+
+    // 3. Prevent another Ledger upload for same batch
     const existingTransactions = await LedgerTransaction.countDocuments({
       batchId: batch._id,
     });
@@ -240,7 +266,7 @@ export const uploadLedgerFile = async (req, res) => {
       });
     }
 
-    // Save uploaded file details
+    // 4. Save uploaded file metadata
     const batchFile = await BatchFile.create({
       batchId: batch._id,
       uploadedBy: req.user._id,
@@ -251,32 +277,132 @@ export const uploadLedgerFile = async (req, res) => {
 
       originalFileName: req.file.originalname,
       storedFileName: req.file.filename,
-
       filePath: req.file.path,
 
       mimeType: req.file.mimetype,
       fileSize: req.file.size,
+
+      checksum,
+
+      sourceMetadata: {
+        originalName: req.file.originalname,
+        uploadedAt: new Date(),
+        uploadedBy: req.user._id,
+        mimeType: req.file.mimetype,
+        fileSize: req.file.size,
+      },
+
+      uploadStatus: "PROCESSING",
     });
 
-    // Read Excel
+    // 5. Create ingestion job
+    const ingestionJob = await IngestionJob.create({
+      jobId: `ING-${Date.now()}-${batchFile._id.toString().slice(-6)}`,
+
+      batchId: batch._id,
+      batchFileId: batchFile._id,
+
+      fileType: "LEDGER",
+
+      status: "RECEIVED",
+
+      startedAt: new Date(),
+    });
+
+    // Link ingestion job to file
+    batchFile.ingestionJobId = ingestionJob._id;
+    await batchFile.save();
+
+    // 6. PARSING
+    ingestionJob.status = "PARSING";
+    await ingestionJob.save();
+
     const rows = readExcelFile(req.file.path);
 
-    // Validate Excel
+    ingestionJob.totalRows = rows.length;
+    await ingestionJob.save();
+
+    // 7. VALIDATING
+    ingestionJob.status = "VALIDATING";
+    await ingestionJob.save();
+
     const validation = validateLedger(rows);
 
+    // 8. Handle validation failure
     if (!validation.isValid) {
+      ingestionJob.status = "FAILED";
+
+      ingestionJob.invalidRecords = validation.invalidRows;
+
+      ingestionJob.errors = [
+        ...validation.fileErrors.map((message) => ({
+          row: null,
+          field: null,
+          message,
+        })),
+
+        ...validation.rowErrors.map((error) => ({
+          row: error.row,
+          field: error.field || null,
+          message:
+            error.message ||
+            (error.errors ? error.errors.join(", ") : "Invalid row"),
+        })),
+      ];
+
+      ingestionJob.errorMessage = "Ledger file validation failed";
+
+      ingestionJob.completedAt = new Date();
+
+      ingestionJob.processingDurationMs =
+        ingestionJob.completedAt.getTime() - ingestionJob.startedAt.getTime();
+
+      await ingestionJob.save();
+
+      batchFile.uploadStatus = "FAILED";
+      await batchFile.save();
+
+      await createAuditLog({
+        action: "LEDGER_UPLOADED",
+        description: `Ledger file validation failed (${req.file.originalname})`,
+        performedBy: req.user._id,
+        role: req.user.role,
+        batchId: batch._id,
+        status: "FAILED",
+        metadata: {
+          fileName: req.file.originalname,
+          checksum,
+          ingestionJobId: ingestionJob.jobId,
+          totalRows: validation.totalRows,
+          invalidRecords: validation.invalidRows,
+          fileErrors: validation.fileErrors,
+          rowErrors: validation.rowErrors,
+        },
+        req,
+      });
+
       return res.status(400).json({
         success: false,
         message: "Validation failed",
+        ingestionJobId: ingestionJob.jobId,
         fileErrors: validation.fileErrors,
         rowErrors: validation.rowErrors,
         warnings: validation.warnings,
       });
     }
 
-    // Convert Excel rows into LedgerTransaction documents
-    const ledgerTransactions = rows.map((row) => ({
+    // 9. TRANSFORMING
+    ingestionJob.status = "TRANSFORMING";
+    await ingestionJob.save();
+
+    const ledgerTransactions = rows.map((row, index) => ({
       batchId: batch._id,
+
+      sourceFileId: batchFile._id,
+
+      ingestionJobId: ingestionJob._id,
+
+      sourceRowNumber: index + 2,
 
       transactionId: row["Transaction ID"],
 
@@ -289,40 +415,134 @@ export const uploadLedgerFile = async (req, res) => {
       status: "PENDING",
     }));
 
-    // Bulk insert transactions
-    await LedgerTransaction.insertMany(ledgerTransactions);
+    // 10. DEDUPLICATING
+    ingestionJob.status = "DEDUPLICATING";
+    await ingestionJob.save();
 
-    // Update batch
+    const transactionIdentities = new Set();
+
+    const uniqueLedgerTransactions = [];
+
+    let duplicateRecords = 0;
+
+    for (const transaction of ledgerTransactions) {
+      const identity = [
+        transaction.transactionId,
+        transaction.referenceNumber,
+        new Date(transaction.transactionDate).toISOString().split("T")[0],
+        transaction.amount,
+      ].join("|");
+
+      if (transactionIdentities.has(identity)) {
+        duplicateRecords++;
+      } else {
+        transactionIdentities.add(identity);
+        uniqueLedgerTransactions.push(transaction);
+      }
+    }
+
+    // 11. LOADING
+    ingestionJob.status = "LOADING";
+    await ingestionJob.save();
+
+    if (uniqueLedgerTransactions.length > 0) {
+      await LedgerTransaction.insertMany(uniqueLedgerTransactions);
+    }
+
+    // 12. Update ingestion statistics
+    ingestionJob.validRecords = uniqueLedgerTransactions.length;
+
+    ingestionJob.invalidRecords = validation.invalidRows;
+
+    ingestionJob.duplicateRecords = duplicateRecords;
+
+    // 13. Update batch
     batch.files.push(batchFile._id);
-    batch.totalLedgerTransactions = ledgerTransactions.length;
+
+    batch.totalLedgerTransactions = uniqueLedgerTransactions.length;
+
     batch.status = "PARTIAL_UPLOAD";
 
     await batch.save();
 
-    // Delete local uploaded file
-    fs.unlinkSync(req.file.path);
+    // 14. Complete ingestion
+    ingestionJob.status = "COMPLETED";
 
+    ingestionJob.completedAt = new Date();
+
+    ingestionJob.processingDurationMs =
+      ingestionJob.completedAt.getTime() - ingestionJob.startedAt.getTime();
+
+    await ingestionJob.save();
+
+    // 15. Update BatchFile
+    batchFile.uploadStatus = "PROCESSED";
+
+    await batchFile.save();
+
+    // 16. Delete temporary local file
+    if (fs.existsSync(req.file.path)) {
+      fs.unlinkSync(req.file.path);
+    }
+
+    // 17. Audit
     await createAuditLog({
       action: "LEDGER_UPLOADED",
+
       description: `Uploaded ledger file (${req.file.originalname})`,
+
       performedBy: req.user._id,
+
       role: req.user.role,
+
       batchId: batch._id,
+
       metadata: {
         fileName: req.file.originalname,
-        totalTransactions: ledgerTransactions.length,
+
+        checksum,
+
+        ingestionJobId: ingestionJob.jobId,
+
+        totalRows: rows.length,
+
+        totalTransactions: uniqueLedgerTransactions.length,
+
+        invalidRecords: validation.invalidRows,
+
+        duplicateRecords,
       },
+
       req,
     });
 
+    // 18. Response
     return res.status(200).json({
       success: true,
+
       message: "Ledger uploaded successfully",
-      totalTransactions: ledgerTransactions.length,
+
+      ingestionJobId: ingestionJob.jobId,
+
+      totalRows: rows.length,
+
+      validRecords: uniqueLedgerTransactions.length,
+
+      invalidRecords: validation.invalidRows,
+
+      duplicateRecords,
+
+      totalTransactions: uniqueLedgerTransactions.length,
+
       batch,
+
       batchFile,
+
+      ingestionJob,
     });
   } catch (error) {
+    console.error("Ledger ingestion error:", error);
+
     return res.status(500).json({
       success: false,
       message: error.message,

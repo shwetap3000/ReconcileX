@@ -58,6 +58,24 @@ const batchFileSchema = new mongoose.Schema(
       required: true,
     },
 
+    checksum: {
+      type: String,
+      required: true,
+      index: true,
+    },
+
+    sourceMetadata: {
+      type: mongoose.Schema.Types.Mixed,
+      default: {},
+    },
+
+    ingestionJobId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "IngestionJob",
+      default: null,
+      index: true,
+    },
+
     uploadStatus: {
       type: String,
       enum: ["UPLOADED", "PROCESSING", "PROCESSED", "FAILED"],

@@ -9,6 +9,26 @@ const ledgerTransactionSchema = new mongoose.Schema(
       index: true,
     },
 
+    // Ingestion lineage
+    sourceFileId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "BatchFile",
+      required: true,
+      index: true,
+    },
+
+    ingestionJobId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "IngestionJob",
+      required: true,
+      index: true,
+    },
+
+    sourceRowNumber: {
+      type: Number,
+      required: true,
+    },
+
     transactionId: {
       type: String,
       required: true,
