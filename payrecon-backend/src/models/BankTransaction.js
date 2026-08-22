@@ -47,6 +47,25 @@ const bankTransactionSchema = new mongoose.Schema(
       default: "",
     },
 
+    sourceFileId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "BatchFile",
+      required: true,
+      index: true,
+    },
+
+    ingestionJobId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "IngestionJob",
+      required: true,
+      index: true,
+    },
+
+    sourceRowNumber: {
+      type: Number,
+      required: true,
+    },
+
     reconciliationStatus: {
       type: String,
       enum: [

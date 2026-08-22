@@ -553,12 +553,16 @@ export const uploadLedgerFile = async (req, res) => {
 // to upload a bank file to a specific batch
 export const uploadBankFile = async (req, res) => {
   try {
+    // 1. Validate Batch ID
+
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
       return res.status(400).json({
         success: false,
         message: "Invalid Batch ID",
       });
     }
+
+    // 2. Find Batch
 
     const batch = await Batch.findById(req.params.id);
 
@@ -569,6 +573,8 @@ export const uploadBankFile = async (req, res) => {
       });
     }
 
+    // 3. Check file
+
     if (!req.file) {
       return res.status(400).json({
         success: false,
@@ -576,16 +582,54 @@ export const uploadBankFile = async (req, res) => {
       });
     }
 
+    // 4. Generate SHA-256 checksum
+
+    const fileBuffer = fs.readFileSync(req.file.path);
+
+    const checksum = crypto
+      .createHash("sha256")
+      .update(fileBuffer)
+      .digest("hex");
+
+    // 5. Check duplicate file
+
+    const existingFile = await BatchFile.findOne({
+      batchId: batch._id,
+      fileType: "BANK",
+      checksum,
+      isActive: true,
+    });
+
+    if (existingFile) {
+      if (fs.existsSync(req.file.path)) {
+        fs.unlinkSync(req.file.path);
+      }
+
+      return res.status(409).json({
+        success: false,
+        message:
+          "This exact Bank file has already been uploaded for this batch.",
+      });
+    }
+
+    // 6. Prevent another Bank upload for same batch
+
     const existingTransactions = await BankTransaction.countDocuments({
       batchId: batch._id,
     });
 
     if (existingTransactions > 0) {
+      if (fs.existsSync(req.file.path)) {
+        fs.unlinkSync(req.file.path);
+      }
+
       return res.status(400).json({
         success: false,
         message: "Bank file has already been uploaded for this batch.",
       });
     }
+
+    // 7. Save BatchFile
 
     const batchFile = await BatchFile.create({
       batchId: batch._id,
@@ -599,6 +643,7 @@ export const uploadBankFile = async (req, res) => {
       uploadedBy: req.user._id,
 
       originalFileName: req.file.originalname,
+
       storedFileName: req.file.filename,
 
       filePath: req.file.path,
@@ -606,38 +651,221 @@ export const uploadBankFile = async (req, res) => {
       mimeType: req.file.mimetype,
 
       fileSize: req.file.size,
+
+      checksum,
+
+      sourceMetadata: {
+        originalName: req.file.originalname,
+        uploadedAt: new Date(),
+        uploadedBy: req.user._id,
+        mimeType: req.file.mimetype,
+        fileSize: req.file.size,
+      },
+
+      uploadStatus: "PROCESSING",
     });
+
+    // 8. Create Ingestion Job
+
+    const ingestionJob = await IngestionJob.create({
+      jobId: `ING-${Date.now()}-${batchFile._id.toString().slice(-6)}`,
+
+      batchId: batch._id,
+
+      batchFileId: batchFile._id,
+
+      fileType: "BANK",
+
+      status: "RECEIVED",
+
+      startedAt: new Date(),
+    });
+
+    // Link job to BatchFile
+    batchFile.ingestionJobId = ingestionJob._id;
+
+    await batchFile.save();
+
+    // 9. PARSING
+
+    ingestionJob.status = "PARSING";
+
+    await ingestionJob.save();
 
     const rows = readExcelFile(req.file.path);
 
+    ingestionJob.totalRows = rows.length;
+
+    await ingestionJob.save();
+
+    // 10. VALIDATING
+
+    ingestionJob.status = "VALIDATING";
+
+    await ingestionJob.save();
+
     const validation = validateBank(rows);
 
+    // 11. Handle validation failure
+
     if (!validation.isValid) {
+      ingestionJob.status = "FAILED";
+
+      ingestionJob.invalidRecords = validation.invalidRows || 0;
+
+      ingestionJob.errors = [
+        ...validation.fileErrors.map((message) => ({
+          row: null,
+          field: null,
+          message,
+        })),
+
+        ...validation.rowErrors.map((error) => ({
+          row: error.row,
+          field: error.field || null,
+          message:
+            error.message ||
+            (error.errors ? error.errors.join(", ") : "Invalid row"),
+        })),
+      ];
+
+      ingestionJob.errorMessage = "Bank file validation failed";
+
+      ingestionJob.completedAt = new Date();
+
+      ingestionJob.processingDurationMs =
+        ingestionJob.completedAt.getTime() - ingestionJob.startedAt.getTime();
+
+      await ingestionJob.save();
+
+      batchFile.uploadStatus = "FAILED";
+
+      await batchFile.save();
+
+      await createAuditLog({
+        action: "BANK_UPLOADED",
+
+        description: `Bank file validation failed (${req.file.originalname})`,
+
+        performedBy: req.user._id,
+
+        role: req.user.role,
+
+        batchId: batch._id,
+
+        status: "FAILED",
+
+        metadata: {
+          fileName: req.file.originalname,
+          checksum,
+          ingestionJobId: ingestionJob.jobId,
+          totalRows: rows.length,
+          invalidRecords: validation.invalidRows || 0,
+        },
+
+        req,
+      });
+
+      if (fs.existsSync(req.file.path)) {
+        fs.unlinkSync(req.file.path);
+      }
+
       return res.status(400).json({
         success: false,
+
         message: "Validation failed",
+
+        ingestionJobId: ingestionJob.jobId,
+
         fileErrors: validation.fileErrors,
+
         rowErrors: validation.rowErrors,
+
         warnings: validation.warnings,
       });
     }
 
-    const bankTransactions = rows.map((row) => ({
+    // 12. TRANSFORMING
+
+    ingestionJob.status = "TRANSFORMING";
+
+    await ingestionJob.save();
+
+    const bankTransactions = rows.map((row, index) => ({
       batchId: batch._id,
 
+      sourceFileId: batchFile._id,
+
+      ingestionJobId: ingestionJob._id,
+
+      sourceRowNumber: index + 2,
+
       referenceNumber: row["Reference Number"],
+
       transactionDate: new Date(row["Transaction Date"]),
+
       amount: Number(row["Amount"]),
+
       transactionType: row["Transaction Type"],
 
       status: "PENDING",
     }));
 
-    await BankTransaction.insertMany(bankTransactions);
+    // 13. DEDUPLICATING
+
+    ingestionJob.status = "DEDUPLICATING";
+
+    await ingestionJob.save();
+
+    const transactionIdentities = new Set();
+
+    const uniqueBankTransactions = [];
+
+    let duplicateRecords = 0;
+
+    for (const transaction of bankTransactions) {
+      const identity = [
+        transaction.referenceNumber,
+
+        new Date(transaction.transactionDate).toISOString().split("T")[0],
+
+        transaction.amount,
+
+        transaction.transactionType,
+      ].join("|");
+
+      if (transactionIdentities.has(identity)) {
+        duplicateRecords++;
+      } else {
+        transactionIdentities.add(identity);
+
+        uniqueBankTransactions.push(transaction);
+      }
+    }
+
+    // 14. LOADING
+
+    ingestionJob.status = "LOADING";
+
+    await ingestionJob.save();
+
+    if (uniqueBankTransactions.length > 0) {
+      await BankTransaction.insertMany(uniqueBankTransactions);
+    }
+
+    // 15. Update ingestion statistics
+
+    ingestionJob.validRecords = uniqueBankTransactions.length;
+
+    ingestionJob.invalidRecords = validation.invalidRows || 0;
+
+    ingestionJob.duplicateRecords = duplicateRecords;
+
+    // 16. Update Batch
 
     batch.files.push(batchFile._id);
 
-    batch.totalBankTransactions = bankTransactions.length;
+    batch.totalBankTransactions = uniqueBankTransactions.length;
 
     if (batch.totalLedgerTransactions > 0) {
       batch.status = "UPLOADED";
@@ -647,31 +875,92 @@ export const uploadBankFile = async (req, res) => {
 
     await batch.save();
 
+    // 17. Complete ingestion
+
+    ingestionJob.status = "COMPLETED";
+
+    ingestionJob.completedAt = new Date();
+
+    ingestionJob.processingDurationMs =
+      ingestionJob.completedAt.getTime() - ingestionJob.startedAt.getTime();
+
+    await ingestionJob.save();
+
+    // 18. Update BatchFile
+
+    batchFile.uploadStatus = "PROCESSED";
+
+    await batchFile.save();
+
+    // 19. Delete temporary local file
+
     if (fs.existsSync(req.file.path)) {
       fs.unlinkSync(req.file.path);
     }
 
+    // 20. Audit
+
     await createAuditLog({
       action: "BANK_UPLOADED",
+
       description: `Uploaded bank file (${req.file.originalname})`,
+
       performedBy: req.user._id,
+
       role: req.user.role,
+
       batchId: batch._id,
+
       metadata: {
         fileName: req.file.originalname,
-        totalTransactions: bankTransactions.length,
+
+        checksum,
+
+        ingestionJobId: ingestionJob.jobId,
+
+        totalRows: rows.length,
+
+        totalTransactions: uniqueBankTransactions.length,
+
+        invalidRecords: validation.invalidRows || 0,
+
+        duplicateRecords,
       },
+
       req,
     });
 
+    // 21. Response
     return res.status(200).json({
       success: true,
+
       message: "Bank uploaded successfully",
-      totalTransactions: bankTransactions.length,
+
+      ingestionJobId: ingestionJob.jobId,
+
+      totalRows: rows.length,
+
+      validRecords: uniqueBankTransactions.length,
+
+      invalidRecords: validation.invalidRows || 0,
+
+      duplicateRecords,
+
+      totalTransactions: uniqueBankTransactions.length,
+
       batch,
+
       batchFile,
+
+      ingestionJob,
     });
   } catch (error) {
+    console.error("Bank ingestion error:", error);
+
+    if (req.file?.path && fs.existsSync(req.file.path)) {
+      fs.unlinkSync(req.file.path);
+    }
+
     return res.status(500).json({
       success: false,
       message: error.message,
