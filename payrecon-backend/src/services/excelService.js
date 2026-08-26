@@ -7,6 +7,14 @@ const isEmptyRow = (row) => {
   );
 };
 
+const extractRows = (worksheet) => {
+  return xlsx.utils.sheet_to_json(worksheet, {
+    defval: "",
+    raw: true,
+    cellDates: true,
+  });
+};
+
 export const readExcelFile = (filePath) => {
   let workbook;
 
@@ -30,54 +38,47 @@ export const readExcelFile = (filePath) => {
     throw new Error("Excel workbook contains no sheets.");
   }
 
-  // 3. Find the first usable sheet
-  let worksheet = null;
-  let sheetName = null;
+  // 3. Find the first sheet that actually contains data
+  let selectedRows = null;
 
-  for (const name of workbook.SheetNames) {
-    const sheet = workbook.Sheets[name];
+  for (const sheetName of workbook.SheetNames) {
+    const worksheet = workbook.Sheets[sheetName];
 
-    if (!sheet) {
+    if (!worksheet) {
       continue;
     }
 
-    const range = xlsx.utils.decode_range(sheet["!ref"] || "A1:A1");
+    let rows;
 
-    if (range.e.r >= range.s.r && range.e.c >= range.s.c) {
-      worksheet = sheet;
-      sheetName = name;
+    try {
+      rows = extractRows(worksheet);
+    } catch (error) {
+      throw new Error(
+        `Unable to extract data from Excel worksheet "${sheetName}".`,
+      );
+    }
+
+    if (!Array.isArray(rows)) {
+      continue;
+    }
+
+    // Remove completely empty rows
+    const nonEmptyRows = rows.filter((row) => !isEmptyRow(row));
+
+    // Only consider this sheet usable if it actually contains data
+    if (nonEmptyRows.length > 0) {
+      selectedRows = nonEmptyRows;
       break;
     }
   }
 
-  if (!worksheet) {
-    throw new Error("Excel workbook contains no usable worksheets.");
+  // 4. No sheet contained any data
+  if (!selectedRows) {
+    return [];
   }
 
-  // 4. Extract rows
-  let rows;
-
-  try {
-    rows = xlsx.utils.sheet_to_json(worksheet, {
-      defval: "",
-      raw: true,
-      cellDates: true,
-    });
-  } catch (error) {
-    throw new Error(
-      `Unable to extract data from Excel worksheet "${sheetName}".`,
-    );
-  }
-
-  if (!Array.isArray(rows)) {
-    throw new Error("Unable to extract rows from Excel worksheet.");
-  }
-
-  // 5. Remove completely empty rows
-  const nonEmptyRows = rows.filter((row) => !isEmptyRow(row));
-
-  // 6. Return the same rows[] structure expected by validators
-  return nonEmptyRows;
+  // 5. Return the same rows[] structure expected by validators
+  return selectedRows;
 };
 
 export default readExcelFile;
