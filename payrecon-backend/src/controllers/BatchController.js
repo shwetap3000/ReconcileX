@@ -487,10 +487,10 @@ export const uploadLedgerFile = async (req, res) => {
 
     await batchFile.save();
 
-    // 16. Delete temporary local file
-    if (fs.existsSync(req.file.path)) {
-      fs.unlinkSync(req.file.path);
-    }
+    // // 16. Delete temporary local file
+    // if (fs.existsSync(req.file.path)) {
+    //   fs.unlinkSync(req.file.path);
+    // }
 
     // 17. Audit
     await createAuditLog({
@@ -951,11 +951,10 @@ export const uploadBankFile = async (req, res) => {
 
     await batchFile.save();
 
-    // 19. Delete temporary local file
-
-    if (fs.existsSync(req.file.path)) {
-      fs.unlinkSync(req.file.path);
-    }
+    // // 19. Delete temporary local file
+    // if (fs.existsSync(req.file.path)) {
+    //   fs.unlinkSync(req.file.path);
+    // }
 
     // 20. Audit
 
