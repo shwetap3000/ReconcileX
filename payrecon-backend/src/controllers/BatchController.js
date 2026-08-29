@@ -203,6 +203,9 @@ export const getBatchById = async (req, res) => {
 
 // to upload a ledger file to a specific batch
 export const uploadLedgerFile = async (req, res) => {
+  let batchFile = null;
+  let ingestionJob = null;
+
   try {
     // Check if Batch ID is valid
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
@@ -267,7 +270,7 @@ export const uploadLedgerFile = async (req, res) => {
     }
 
     // 4. Save uploaded file metadata
-    const batchFile = await BatchFile.create({
+    batchFile = await BatchFile.create({
       batchId: batch._id,
       uploadedBy: req.user._id,
 
@@ -296,7 +299,7 @@ export const uploadLedgerFile = async (req, res) => {
     });
 
     // 5. Create ingestion job
-    const ingestionJob = await IngestionJob.create({
+    ingestionJob = await IngestionJob.create({
       jobId: `ING-${Date.now()}-${batchFile._id.toString().slice(-6)}`,
 
       batchId: batch._id,
@@ -461,7 +464,11 @@ export const uploadLedgerFile = async (req, res) => {
 
     batch.totalLedgerTransactions = uniqueLedgerTransactions.length;
 
-    batch.status = "PARTIAL_UPLOAD";
+    if (batch.totalBankTransactions > 0) {
+      batch.status = "UPLOADED";
+    } else {
+      batch.status = "PARTIAL_UPLOAD";
+    }
 
     await batch.save();
 
@@ -543,15 +550,67 @@ export const uploadLedgerFile = async (req, res) => {
   } catch (error) {
     console.error("Ledger ingestion error:", error);
 
-    return res.status(500).json({
+    // If an ingestion job was created, mark it as FAILED
+    if (ingestionJob) {
+      try {
+        ingestionJob.status = "FAILED";
+
+        ingestionJob.errorMessage = error.message;
+
+        ingestionJob.completedAt = new Date();
+
+        if (ingestionJob.startedAt) {
+          ingestionJob.processingDurationMs =
+            ingestionJob.completedAt.getTime() -
+            ingestionJob.startedAt.getTime();
+        }
+
+        ingestionJob.errors = [
+          {
+            row: null,
+            field: null,
+            message: error.message,
+          },
+        ];
+
+        await ingestionJob.save();
+      } catch (updateError) {
+        console.error("Failed to update Ledger ingestion job:", updateError);
+      }
+    }
+
+    // Mark uploaded file as FAILED
+    if (batchFile) {
+      try {
+        batchFile.uploadStatus = "FAILED";
+        await batchFile.save();
+      } catch (updateError) {
+        console.error("Failed to update Ledger BatchFile:", updateError);
+      }
+    }
+
+    // Delete temporary uploaded file
+    if (req.file?.path && fs.existsSync(req.file.path)) {
+      try {
+        fs.unlinkSync(req.file.path);
+      } catch (deleteError) {
+        console.error("Failed to delete Ledger temporary file:", deleteError);
+      }
+    }
+
+    return res.status(400).json({
       success: false,
       message: error.message,
+      ingestionJobId: ingestionJob?.jobId || null,
     });
   }
 };
 
 // to upload a bank file to a specific batch
 export const uploadBankFile = async (req, res) => {
+  let batchFile = null;
+  let ingestionJob = null;
+
   try {
     // 1. Validate Batch ID
 
@@ -631,7 +690,7 @@ export const uploadBankFile = async (req, res) => {
 
     // 7. Save BatchFile
 
-    const batchFile = await BatchFile.create({
+    batchFile = await BatchFile.create({
       batchId: batch._id,
 
       fileType: "BANK",
@@ -667,7 +726,7 @@ export const uploadBankFile = async (req, res) => {
 
     // 8. Create Ingestion Job
 
-    const ingestionJob = await IngestionJob.create({
+    ingestionJob = await IngestionJob.create({
       jobId: `ING-${Date.now()}-${batchFile._id.toString().slice(-6)}`,
 
       batchId: batch._id,
@@ -997,9 +1056,60 @@ export const reconcileBatch = async (req, res) => {
       ...result,
     });
   } catch (error) {
-    return res.status(500).json({
+    console.error("Bank ingestion error:", error);
+
+    // If an ingestion job was created, mark it as FAILED
+    if (ingestionJob) {
+      try {
+        ingestionJob.status = "FAILED";
+
+        ingestionJob.errorMessage = error.message;
+
+        ingestionJob.completedAt = new Date();
+
+        if (ingestionJob.startedAt) {
+          ingestionJob.processingDurationMs =
+            ingestionJob.completedAt.getTime() -
+            ingestionJob.startedAt.getTime();
+        }
+
+        ingestionJob.errors = [
+          {
+            row: null,
+            field: null,
+            message: error.message,
+          },
+        ];
+
+        await ingestionJob.save();
+      } catch (updateError) {
+        console.error("Failed to update Bank ingestion job:", updateError);
+      }
+    }
+
+    // Mark uploaded file as FAILED
+    if (batchFile) {
+      try {
+        batchFile.uploadStatus = "FAILED";
+        await batchFile.save();
+      } catch (updateError) {
+        console.error("Failed to update Bank BatchFile:", updateError);
+      }
+    }
+
+    // Delete temporary uploaded file
+    if (req.file?.path && fs.existsSync(req.file.path)) {
+      try {
+        fs.unlinkSync(req.file.path);
+      } catch (deleteError) {
+        console.error("Failed to delete Bank temporary file:", deleteError);
+      }
+    }
+
+    return res.status(400).json({
       success: false,
       message: error.message,
+      ingestionJobId: ingestionJob?.jobId || null,
     });
   }
 };

@@ -21,13 +21,9 @@ const storage = multer.diskStorage({
 });
 
 const fileFilter = (req, file, cb) => {
-  const allowedMimeTypes = [
-    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-  ];
-
   const extension = path.extname(file.originalname).toLowerCase();
 
-  if (extension !== ".xlsx" || !allowedMimeTypes.includes(file.mimetype)) {
+  if (extension !== ".xlsx") {
     return cb(new Error("Only XLSX files are allowed."), false);
   }
 

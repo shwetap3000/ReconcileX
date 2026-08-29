@@ -3,7 +3,7 @@ const validateBank = (rows) => {
   const rowErrors = [];
   const warnings = [];
 
-  // 1. Empty file validation
+  // 1. Check if file is empty
   if (!rows || rows.length === 0) {
     fileErrors.push("Uploaded Excel file is empty.");
 
@@ -50,37 +50,49 @@ const validateBank = (rows) => {
   // 4. Validate every row
   rows.forEach((row, index) => {
     const currentRow = index + 2;
-    const errors = [];
 
+    // Reference Number
     if (!row["Reference Number"]) {
-      errors.push("Reference Number is required");
+      rowErrors.push({
+        row: currentRow,
+        field: "Reference Number",
+        message: "Reference Number is required",
+      });
     }
 
+    // Transaction Date
     if (!row["Transaction Date"]) {
-      errors.push("Transaction Date is required");
+      rowErrors.push({
+        row: currentRow,
+        field: "Transaction Date",
+        message: "Transaction Date is required",
+      });
     }
 
+    // Amount
     if (
       row["Amount"] === undefined ||
       row["Amount"] === null ||
       row["Amount"] === ""
     ) {
-      errors.push("Amount is required");
-    }
-
-    if (!row["Transaction Type"]) {
-      errors.push("Transaction Type is required");
-    }
-
-    if (errors.length > 0) {
       rowErrors.push({
         row: currentRow,
-        errors,
+        field: "Amount",
+        message: "Amount is required",
+      });
+    }
+
+    // Transaction Type
+    if (!row["Transaction Type"]) {
+      rowErrors.push({
+        row: currentRow,
+        field: "Transaction Type",
+        message: "Transaction Type is required",
       });
     }
   });
 
-  // 5. Count invalid rows
+  // 5. Count unique invalid rows
   const invalidRowNumbers = new Set(rowErrors.map((error) => error.row));
 
   const invalidRows = invalidRowNumbers.size;
@@ -89,9 +101,11 @@ const validateBank = (rows) => {
   // 6. Return validation result
   return {
     isValid: fileErrors.length === 0 && rowErrors.length === 0,
+
     totalRows: rows.length,
     validRows,
     invalidRows,
+
     fileErrors,
     rowErrors,
     warnings,
