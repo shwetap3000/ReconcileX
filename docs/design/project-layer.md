@@ -1,6 +1,4 @@
-Yes. Before we build anything, I would divide your **Payment Reconciliation & Audit Trail System** into clear layers based on the actual responsibilities of the system.
-
-Your project isn't simply "MERN + reconciliation." The architecture has several distinct business and technical layers. Your original project description already separates authentication/RBAC, batch management, ingestion, reconciliation, analytics, Maker-Checker, audit, and APIs. 
+![Layer Architecture](layer_architecture.png)
 
 # Overall Architecture
 
