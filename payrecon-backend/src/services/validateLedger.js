@@ -1,39 +1,40 @@
+import { mapColumns } from "../utils/columnMapper.js";
+
 const validateLedger = (rows) => {
   // Arrays to store validation results
   const fileErrors = [];
   const rowErrors = [];
   const warnings = [];
 
-  // Check if file is empty
+  // 1. Check if file is empty
   if (!rows || rows.length === 0) {
     fileErrors.push("Uploaded Excel file is empty.");
+
+    return {
+      isValid: false,
+      totalRows: 0,
+      validRows: 0,
+      invalidRows: 0,
+      fileErrors,
+      rowErrors,
+      warnings,
+    };
   }
 
-  // Required columns
-  const requiredColumns = [
-    "Transaction ID",
-    "Reference Number",
-    "Transaction Date",
-    "Amount",
-  ];
+  // 2. Column mapping
+  const columnMappings = {
+    "Transaction ID": ["Txn ID", "Transaction No"],
+    "Reference Number": ["Reference No", "Ref No"],
+    "Transaction Date": ["Date", "Txn Date"],
+    Amount: ["Transaction Amount", "Txn Amount"],
+  };
 
-  // Check if required columns exist
-  if (rows.length > 0) {
-    const uploadedColumns = Object.keys(rows[0]);
+  const mappingResult = mapColumns(rows, columnMappings);
 
-    const missingColumns = requiredColumns.filter(
-      (column) => !uploadedColumns.includes(column)
-    );
+  // 3. Handle column mapping errors
+  if (mappingResult.errors.length > 0) {
+    fileErrors.push(...mappingResult.errors);
 
-    if (missingColumns.length > 0) {
-      fileErrors.push(
-        `Missing required columns: ${missingColumns.join(", ")}`
-      );
-    }
-  }
-
-  // Stop here if file-level validation already failed
-  if (fileErrors.length > 0) {
     return {
       isValid: false,
       totalRows: rows.length,
@@ -45,68 +46,126 @@ const validateLedger = (rows) => {
     };
   }
 
-  // Validate every row
+  // Replace original rows with normalized/mapped rows
+  rows = mappingResult.rows;
+
+  // 4. Validate every row
   rows.forEach((row, index) => {
+    const currentRow = index + 2;
+
     // Transaction ID
-    if (!row["Transaction ID"]) {
+
+    if (
+      row["Transaction ID"] === undefined ||
+      row["Transaction ID"] === null ||
+      String(row["Transaction ID"]).trim() === ""
+    ) {
       rowErrors.push({
-        row: index + 2,
+        row: currentRow,
         field: "Transaction ID",
         message: "Transaction ID is required",
+      });
+    } else if (typeof row["Transaction ID"] !== "string") {
+      rowErrors.push({
+        row: currentRow,
+        field: "Transaction ID",
+        message: "Transaction ID must be a string",
       });
     }
 
     // Reference Number
-    if (!row["Reference Number"]) {
+
+    if (
+      row["Reference Number"] === undefined ||
+      row["Reference Number"] === null ||
+      String(row["Reference Number"]).trim() === ""
+    ) {
       rowErrors.push({
-        row: index + 2,
+        row: currentRow,
         field: "Reference Number",
         message: "Reference Number is required",
+      });
+    } else if (typeof row["Reference Number"] !== "string") {
+      rowErrors.push({
+        row: currentRow,
+        field: "Reference Number",
+        message: "Reference Number must be a string",
       });
     }
 
     // Transaction Date
-    if (!row["Transaction Date"]) {
+
+    if (
+      row["Transaction Date"] === undefined ||
+      row["Transaction Date"] === null ||
+      String(row["Transaction Date"]).trim() === ""
+    ) {
       rowErrors.push({
-        row: index + 2,
+        row: currentRow,
         field: "Transaction Date",
         message: "Transaction Date is required",
       });
+    } else {
+      const date = row["Transaction Date"];
+
+      const isValidDate =
+        date instanceof Date
+          ? !Number.isNaN(date.getTime())
+          : !Number.isNaN(new Date(date).getTime());
+
+      if (!isValidDate) {
+        rowErrors.push({
+          row: currentRow,
+          field: "Transaction Date",
+          message: "Transaction Date must be a valid date",
+        });
+      }
     }
 
     // Amount
+
     if (
       row["Amount"] === undefined ||
       row["Amount"] === null ||
-      row["Amount"] === ""
+      String(row["Amount"]).trim() === ""
     ) {
       rowErrors.push({
-        row: index + 2,
+        row: currentRow,
         field: "Amount",
         message: "Amount is required",
       });
+    } else {
+      const amount = row["Amount"];
+
+      const isValidAmount =
+        typeof amount === "number"
+          ? Number.isFinite(amount)
+          : typeof amount === "string" &&
+            amount.trim() !== "" &&
+            Number.isFinite(Number(amount));
+
+      if (!isValidAmount) {
+        rowErrors.push({
+          row: currentRow,
+          field: "Amount",
+          message: "Amount must be a valid number",
+        });
+      }
     }
   });
 
-  // Count unique invalid rows
-  const invalidRowNumbers = new Set(
-    rowErrors.map((error) => error.row)
-  );
+  // 5. Count unique invalid rows
+  const invalidRowNumbers = new Set(rowErrors.map((error) => error.row));
 
-  // Return validation result
+  const invalidRows = invalidRowNumbers.size;
+  const validRows = rows.length - invalidRows;
+
+  // 6. Return validation result
   return {
-    isValid:
-      fileErrors.length === 0 &&
-      rowErrors.length === 0,
-
+    isValid: fileErrors.length === 0 && rowErrors.length === 0,
     totalRows: rows.length,
-
-    validRows:
-      rows.length - invalidRowNumbers.size,
-
-    invalidRows:
-      invalidRowNumbers.size,
-
+    validRows,
+    invalidRows,
     fileErrors,
     rowErrors,
     warnings,

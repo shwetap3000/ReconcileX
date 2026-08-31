@@ -67,6 +67,15 @@ const validateBank = (rows) => {
         field: "Transaction Date",
         message: "Transaction Date is required",
       });
+    } else if (
+      !(row["Transaction Date"] instanceof Date) &&
+      isNaN(new Date(row["Transaction Date"]).getTime())
+    ) {
+      rowErrors.push({
+        row: currentRow,
+        field: "Transaction Date",
+        message: "Transaction Date must be a valid date",
+      });
     }
 
     // Amount
@@ -80,6 +89,12 @@ const validateBank = (rows) => {
         field: "Amount",
         message: "Amount is required",
       });
+    } else if (isNaN(Number(row["Amount"]))) {
+      rowErrors.push({
+        row: currentRow,
+        field: "Amount",
+        message: "Amount must be a valid number",
+      });
     }
 
     // Transaction Type
@@ -88,6 +103,16 @@ const validateBank = (rows) => {
         row: currentRow,
         field: "Transaction Type",
         message: "Transaction Type is required",
+      });
+    } else if (
+      !["DEBIT", "CREDIT"].includes(
+        String(row["Transaction Type"]).trim().toUpperCase(),
+      )
+    ) {
+      rowErrors.push({
+        row: currentRow,
+        field: "Transaction Type",
+        message: "Transaction Type must be DEBIT or CREDIT",
       });
     }
   });

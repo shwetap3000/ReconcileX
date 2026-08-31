@@ -2,6 +2,16 @@ import LedgerTransaction from "../models/LedgerTransaction.js";
 import BankTransaction from "../models/BankTransaction.js";
 import Batch from "../models/Batch.js";
 
+const getDateOnly = (value) => {
+  const date = value instanceof Date ? value : new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return null;
+  }
+
+  return date.toISOString().split("T")[0];
+};
+
 const reconcileTransactions = async (batchId) => {
   // Reset previous reconciliation results
   await LedgerTransaction.updateMany(
@@ -12,7 +22,7 @@ const reconcileTransactions = async (batchId) => {
         reconciliationStatus: "PENDING",
         matchedBankTransaction: null,
       },
-    }
+    },
   );
 
   await BankTransaction.updateMany(
@@ -23,7 +33,7 @@ const reconcileTransactions = async (batchId) => {
         reconciliationStatus: "PENDING",
         matchedLedgerTransaction: null,
       },
-    }
+    },
   );
 
   // Fetch fresh transactions
@@ -42,7 +52,7 @@ const reconcileTransactions = async (batchId) => {
     const bank = bankTransactions.find(
       (b) =>
         !b.matchedLedgerTransaction &&
-        b.referenceNumber.trim() === ledger.referenceNumber.trim()
+        b.referenceNumber.trim() === ledger.referenceNumber.trim(),
     );
 
     // Missing in Bank
@@ -75,13 +85,8 @@ const reconcileTransactions = async (batchId) => {
     }
 
     // Compare only dates (ignore time)
-    const ledgerDate = new Date(ledger.transactionDate)
-      .toISOString()
-      .split("T")[0];
-
-    const bankDate = new Date(bank.transactionDate)
-      .toISOString()
-      .split("T")[0];
+    const ledgerDate = getDateOnly(ledger.transactionDate);
+    const bankDate = getDateOnly(bank.transactionDate);
 
     if (ledgerDate !== bankDate) {
       ledger.status = "MISMATCH";

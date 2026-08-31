@@ -15,6 +15,16 @@ import { createAuditLog } from "../services/auditService.js";
 import crypto from "crypto";
 import IngestionJob from "../models/IngestionJob.js";
 
+const getDateOnly = (value) => {
+  const date = value instanceof Date ? value : new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return null;
+  }
+
+  return date.toISOString().split("T")[0];
+};
+
 // to create a new batch
 export const createBatch = async (req, res) => {
   try {
@@ -429,10 +439,12 @@ export const uploadLedgerFile = async (req, res) => {
     let duplicateRecords = 0;
 
     for (const transaction of ledgerTransactions) {
+      const transactionDate = getDateOnly(transaction.transactionDate);
+
       const identity = [
         transaction.transactionId,
         transaction.referenceNumber,
-        new Date(transaction.transactionDate).toISOString().split("T")[0],
+        transactionDate,
         transaction.amount,
       ].join("|");
 
@@ -883,13 +895,12 @@ export const uploadBankFile = async (req, res) => {
     let duplicateRecords = 0;
 
     for (const transaction of bankTransactions) {
+      const transactionDate = getDateOnly(transaction.transactionDate);
+
       const identity = [
         transaction.referenceNumber,
-
-        new Date(transaction.transactionDate).toISOString().split("T")[0],
-
+        transactionDate,
         transaction.amount,
-
         transaction.transactionType,
       ].join("|");
 
