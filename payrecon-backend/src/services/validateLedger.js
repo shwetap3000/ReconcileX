@@ -137,18 +137,37 @@ const validateLedger = (rows) => {
     } else {
       const amount = row["Amount"];
 
-      const isValidAmount =
+      const numericAmount =
         typeof amount === "number"
-          ? Number.isFinite(amount)
-          : typeof amount === "string" &&
-            amount.trim() !== "" &&
-            Number.isFinite(Number(amount));
+          ? amount
+          : typeof amount === "string" && amount.trim() !== ""
+            ? Number(amount)
+            : NaN;
 
-      if (!isValidAmount) {
+      // 1. Amount must be a valid number
+      if (!Number.isFinite(numericAmount)) {
         rowErrors.push({
           row: currentRow,
           field: "Amount",
           message: "Amount must be a valid number",
+        });
+      }
+
+      // 2. Amount must not be negative
+      else if (numericAmount < 0) {
+        rowErrors.push({
+          row: currentRow,
+          field: "Amount",
+          message: "Amount cannot be negative",
+        });
+      }
+
+      // 3. Amount must be within allowed range
+      else if (numericAmount > 1000000) {
+        rowErrors.push({
+          row: currentRow,
+          field: "Amount",
+          message: "Amount must not exceed 1000000",
         });
       }
     }
