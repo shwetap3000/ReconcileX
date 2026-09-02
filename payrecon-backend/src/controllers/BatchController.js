@@ -417,9 +417,19 @@ export const uploadLedgerFile = async (req, res) => {
 
       sourceRowNumber: index + 2,
 
-      transactionId: row["Transaction ID"],
+      transactionId:
+        row["Transaction ID"] === undefined ||
+        row["Transaction ID"] === null ||
+        String(row["Transaction ID"]).trim() === ""
+          ? ""
+          : String(row["Transaction ID"]).trim(),
 
-      referenceNumber: row["Reference Number"],
+      referenceNumber:
+        row["Reference Number"] === undefined ||
+        row["Reference Number"] === null ||
+        String(row["Reference Number"]).trim() === ""
+          ? ""
+          : String(row["Reference Number"]).trim(),
 
       transactionDate: new Date(row["Transaction Date"]),
 
@@ -871,17 +881,27 @@ export const uploadBankFile = async (req, res) => {
 
       sourceRowNumber: index + 2,
 
-      referenceNumber: row["Reference Number"],
+      referenceNumber:
+        row["Reference Number"] === undefined ||
+        row["Reference Number"] === null ||
+        String(row["Reference Number"]).trim() === ""
+          ? ""
+          : String(row["Reference Number"]).trim(),
+
+      transactionType:
+        row["Transaction Type"] === undefined ||
+        row["Transaction Type"] === null ||
+        String(row["Transaction Type"]).trim() === ""
+          ? ""
+          : String(row["Transaction Type"]).trim(),
 
       transactionDate: new Date(row["Transaction Date"]),
 
       amount: Number(row["Amount"]),
 
-      transactionType: row["Transaction Type"],
-
       status: "PENDING",
     }));
-
+    
     // 13. DEDUPLICATING
 
     ingestionJob.status = "DEDUPLICATING";
