@@ -1061,6 +1061,8 @@ export const uploadBankFile = async (req, res) => {
 export const reconcileBatch = async (req, res) => {
   try {
     const batchId = req.params.id;
+
+    // 1. Check if batch exists
     const batch = await Batch.findById(batchId);
 
     if (!batch) {
@@ -1070,76 +1072,102 @@ export const reconcileBatch = async (req, res) => {
       });
     }
 
-    const result = await reconcileTransactions(batchId);
-
+    // 2. Audit - reconciliation started
     await createAuditLog({
       action: "RECONCILIATION_STARTED",
+
       description: `Started reconciliation for batch ${batch.batchId}`,
+
       performedBy: req.user._id,
+
       role: req.user.role,
+
       batchId: batch._id,
+
+      status: "SUCCESS",
+
       req,
     });
 
+    // 3. Run reconciliation engine
+    const result = await reconcileTransactions(batchId);
+
+    // 4. Audit - reconciliation completed
+    await createAuditLog({
+      action: "RECONCILIATION_COMPLETED",
+
+      description: `Reconciliation completed for batch ${batch.batchId}`,
+
+      performedBy: req.user._id,
+
+      role: req.user.role,
+
+      batchId: batch._id,
+
+      status: "SUCCESS",
+
+      metadata: {
+        matched: result.matched,
+        amountMismatch: result.amountMismatch,
+        dateMismatch: result.dateMismatch,
+        missingInBank: result.missingInBank,
+        missingInLedger: result.missingInLedger,
+        totalLedgerTransactions: result.totalLedgerTransactions,
+        totalBankTransactions: result.totalBankTransactions,
+      },
+
+      req,
+    });
+
+    // 5. Return reconciliation result
     return res.status(200).json({
       success: true,
+
+      message: "Reconciliation completed successfully",
+
+      batchId: batch._id,
+
       ...result,
     });
   } catch (error) {
-    console.error("Bank ingestion error:", error);
+    console.error("Reconciliation error:", error);
 
-    // If an ingestion job was created, mark it as FAILED
-    if (ingestionJob) {
-      try {
-        ingestionJob.status = "FAILED";
+    // 6. Audit - reconciliation failed
+    try {
+      const batch = await Batch.findById(req.params.id);
 
-        ingestionJob.errorMessage = error.message;
+      if (batch) {
+        await createAuditLog({
+          action: "RECONCILIATION_FAILED",
 
-        ingestionJob.completedAt = new Date();
+          description: `Reconciliation failed for batch ${batch.batchId}`,
 
-        if (ingestionJob.startedAt) {
-          ingestionJob.processingDurationMs =
-            ingestionJob.completedAt.getTime() -
-            ingestionJob.startedAt.getTime();
-        }
+          performedBy: req.user._id,
 
-        ingestionJob.errors = [
-          {
-            row: null,
-            field: null,
-            message: error.message,
+          role: req.user.role,
+
+          batchId: batch._id,
+
+          status: "FAILED",
+
+          metadata: {
+            error: error.message,
           },
-        ];
 
-        await ingestionJob.save();
-      } catch (updateError) {
-        console.error("Failed to update Bank ingestion job:", updateError);
+          req,
+        });
       }
+    } catch (auditError) {
+      console.error(
+        "Failed to create reconciliation failure audit log:",
+        auditError,
+      );
     }
 
-    // Mark uploaded file as FAILED
-    if (batchFile) {
-      try {
-        batchFile.uploadStatus = "FAILED";
-        await batchFile.save();
-      } catch (updateError) {
-        console.error("Failed to update Bank BatchFile:", updateError);
-      }
-    }
-
-    // Delete temporary uploaded file
-    if (req.file?.path && fs.existsSync(req.file.path)) {
-      try {
-        fs.unlinkSync(req.file.path);
-      } catch (deleteError) {
-        console.error("Failed to delete Bank temporary file:", deleteError);
-      }
-    }
-
-    return res.status(400).json({
+    return res.status(500).json({
       success: false,
-      message: error.message,
-      ingestionJobId: ingestionJob?.jobId || null,
+      message: "Reconciliation failed",
+      error: error.message,
     });
   }
 };

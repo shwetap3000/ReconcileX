@@ -2,6 +2,8 @@ import LedgerTransaction from "../models/LedgerTransaction.js";
 import BankTransaction from "../models/BankTransaction.js";
 import Batch from "../models/Batch.js";
 
+// Convert a date to YYYY-MM-DD.
+// This allows us to compare dates while ignoring the time.
 const getDateOnly = (value) => {
   const date = value instanceof Date ? value : new Date(value);
 
@@ -13,7 +15,8 @@ const getDateOnly = (value) => {
 };
 
 const reconcileTransactions = async (batchId) => {
-  // Reset previous reconciliation results
+  // 1. RESET PREVIOUS RECONCILIATION RESULTS
+
   await LedgerTransaction.updateMany(
     { batchId },
     {
@@ -36,27 +39,41 @@ const reconcileTransactions = async (batchId) => {
     },
   );
 
-  // Fetch fresh transactions
-  const ledgerTransactions = await LedgerTransaction.find({ batchId });
-  const bankTransactions = await BankTransaction.find({ batchId });
+  // 2. FETCH TRANSACTIONS
 
-  // Counters
+  const ledgerTransactions = await LedgerTransaction.find({
+    batchId,
+  });
+
+  const bankTransactions = await BankTransaction.find({
+    batchId,
+  });
+
+  // 3. COUNTERS
+
   let matched = 0;
   let missingInBank = 0;
   let missingInLedger = 0;
   let amountMismatch = 0;
   let dateMismatch = 0;
 
-  // Match Ledger to Bank
+  // 4. MATCH LEDGER TRANSACTIONS WITH BANK TRANSACTIONS
+
   for (const ledger of ledgerTransactions) {
-    const bank = bankTransactions.find(
-      (b) =>
-        !b.matchedLedgerTransaction &&
-        b.referenceNumber.trim() === ledger.referenceNumber.trim(),
+    const ledgerReference = ledger.referenceNumber.trim();
+
+    // Find all unused Bank transactions having the same reference.
+    const candidates = bankTransactions.filter(
+      (bank) =>
+        !bank.matchedLedgerTransaction &&
+        bank.referenceNumber.trim() === ledgerReference,
     );
 
-    // Missing in Bank
-    if (!bank) {
+    // -------------------------------------------------------
+    // NO REFERENCE MATCH
+    // -------------------------------------------------------
+
+    if (candidates.length === 0) {
       ledger.status = "MISSING";
       ledger.reconciliationStatus = "MISSING_IN_BANK";
       ledger.matchedBankTransaction = null;
@@ -64,10 +81,27 @@ const reconcileTransactions = async (batchId) => {
       await ledger.save();
 
       missingInBank++;
+
       continue;
     }
 
-    // Amount Mismatch
+    // -------------------------------------------------------
+    // FIND CANDIDATE WITH SAME AMOUNT
+    // -------------------------------------------------------
+
+    const amountMatch = candidates.find(
+      (bank) => bank.amount === ledger.amount,
+    );
+
+    // Use the amount-matching candidate if available.
+    // Otherwise use the first reference-matching candidate
+    // so that we can report an amount mismatch.
+    const bank = amountMatch || candidates[0];
+
+    // -------------------------------------------------------
+    // AMOUNT MISMATCH
+    // -------------------------------------------------------
+
     if (bank.amount !== ledger.amount) {
       ledger.status = "MISMATCH";
       ledger.reconciliationStatus = "AMOUNT_MISMATCH";
@@ -81,12 +115,20 @@ const reconcileTransactions = async (batchId) => {
       await bank.save();
 
       amountMismatch++;
+
       continue;
     }
 
-    // Compare only dates (ignore time)
+    // -------------------------------------------------------
+    // DATE COMPARISON
+    // -------------------------------------------------------
+
     const ledgerDate = getDateOnly(ledger.transactionDate);
     const bankDate = getDateOnly(bank.transactionDate);
+
+    // -------------------------------------------------------
+    // DATE MISMATCH
+    // -------------------------------------------------------
 
     if (ledgerDate !== bankDate) {
       ledger.status = "MISMATCH";
@@ -101,10 +143,14 @@ const reconcileTransactions = async (batchId) => {
       await bank.save();
 
       dateMismatch++;
+
       continue;
     }
 
-    // Perfect Match
+    // -------------------------------------------------------
+    // PERFECT MATCH
+    // -------------------------------------------------------
+
     ledger.status = "MATCHED";
     ledger.reconciliationStatus = "MATCHED";
     ledger.matchedBankTransaction = bank._id;
@@ -119,7 +165,8 @@ const reconcileTransactions = async (batchId) => {
     matched++;
   }
 
-  // Missing in Ledger
+  // 5. FIND BANK TRANSACTIONS MISSING IN LEDGER
+
   for (const bank of bankTransactions) {
     if (!bank.matchedLedgerTransaction) {
       bank.status = "MISSING";
@@ -132,38 +179,45 @@ const reconcileTransactions = async (batchId) => {
     }
   }
 
-  // Update Batch Summary
+  // 6. UPDATE BATCH RECONCILIATION SUMMARY
+
   const batch = await Batch.findById(batchId);
 
-  if (batch) {
-    batch.matchedTransactions = matched;
-    batch.amountMismatchCount = amountMismatch;
-    batch.dateMismatchCount = dateMismatch;
-    batch.missingInBankCount = missingInBank;
-    batch.missingInLedgerCount = missingInLedger;
-
-    batch.status = "RECONCILED";
-
-    await batch.save();
+  if (!batch) {
+    throw new Error("Batch not found");
   }
 
-  // Fetch updated transactions
-  const updatedLedgerTransactions = await LedgerTransaction.find({ batchId });
+  batch.matchedTransactions = matched;
+  batch.amountMismatchCount = amountMismatch;
+  batch.dateMismatchCount = dateMismatch;
+  batch.missingInBankCount = missingInBank;
+  batch.missingInLedgerCount = missingInLedger;
 
-  const updatedBankTransactions = await BankTransaction.find({ batchId });
+  batch.status = "RECONCILED";
+
+  await batch.save();
+
+  // 7. RETURN RECONCILIATION RESULT
 
   return {
+    batchId,
+
+    totalLedgerTransactions: ledgerTransactions.length,
+    totalBankTransactions: bankTransactions.length,
+
     matched,
     amountMismatch,
     dateMismatch,
     missingInBank,
     missingInLedger,
 
-    totalLedgerTransactions: updatedLedgerTransactions.length,
-    totalBankTransactions: updatedBankTransactions.length,
+    ledgerTransactions: await LedgerTransaction.find({
+      batchId,
+    }),
 
-    ledgerTransactions: updatedLedgerTransactions,
-    bankTransactions: updatedBankTransactions,
+    bankTransactions: await BankTransaction.find({
+      batchId,
+    }),
   };
 };
 
