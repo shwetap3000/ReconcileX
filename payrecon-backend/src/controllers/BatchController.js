@@ -901,7 +901,7 @@ export const uploadBankFile = async (req, res) => {
 
       status: "PENDING",
     }));
-    
+
     // 13. DEDUPLICATING
 
     ingestionJob.status = "DEDUPLICATING";
@@ -1187,24 +1187,27 @@ export const getReconciliationSummary = async (req, res) => {
       });
     }
 
-    // Total reconciled transactions
-    const totalReconciled =
-      batch.matchedTransactions +
+    // Total reconciliation exceptions
+    const totalExceptions =
       batch.amountMismatchCount +
       batch.dateMismatchCount +
       batch.missingInBankCount +
       batch.missingInLedgerCount;
 
-    // Calculate match percentage
+    // Calculate match percentage based on total ledger transactions
     const matchPercentage =
-      totalReconciled === 0
+      batch.totalLedgerTransactions === 0
         ? 0
         : Number(
-            ((batch.matchedTransactions / totalReconciled) * 100).toFixed(2),
+            (
+              (batch.matchedTransactions / batch.totalLedgerTransactions) *
+              100
+            ).toFixed(2),
           );
 
     return res.status(200).json({
       success: true,
+
       batch: {
         _id: batch._id,
         batchId: batch.batchId,
@@ -1215,6 +1218,7 @@ export const getReconciliationSummary = async (req, res) => {
         createdAt: batch.createdAt,
         updatedAt: batch.updatedAt,
       },
+
       summary: {
         totalLedgerTransactions: batch.totalLedgerTransactions,
         totalBankTransactions: batch.totalBankTransactions,
@@ -1225,11 +1229,13 @@ export const getReconciliationSummary = async (req, res) => {
         missingInBankCount: batch.missingInBankCount,
         missingInLedgerCount: batch.missingInLedgerCount,
 
-        totalReconciled,
+        totalExceptions,
         matchPercentage,
       },
     });
   } catch (error) {
+    console.error("Get reconciliation summary error:", error);
+
     return res.status(500).json({
       success: false,
       message: error.message,
