@@ -81,18 +81,21 @@ export const getRecentBatches = async (req, res) => {
     }
 
     const recentBatches = await Batch.find(query)
-      .select(`
+      .select(
+        `
         batchId
         batchName
         status
         createdByName
         createdAt
+        totalLedgerTransactions
         matchedTransactions
         amountMismatchCount
         dateMismatchCount
         missingInBankCount
         missingInLedgerCount
-      `)
+      `,
+      )
       .sort({ createdAt: -1 })
       .limit(5)
       .lean();
@@ -109,12 +112,8 @@ export const getRecentBatches = async (req, res) => {
     };
 
     const formattedBatches = recentBatches.map((batch) => {
-      const transactions =
-        (batch.matchedTransactions || 0) +
-        (batch.amountMismatchCount || 0) +
-        (batch.dateMismatchCount || 0) +
-        (batch.missingInBankCount || 0) +
-        (batch.missingInLedgerCount || 0);
+      // Transactions = total transactions from the Ledger file
+      const transactions = batch.totalLedgerTransactions || 0;
 
       return {
         ...batch,

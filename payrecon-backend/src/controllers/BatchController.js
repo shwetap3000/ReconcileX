@@ -128,12 +128,8 @@ export const getBatches = async (req, res) => {
     };
 
     const formattedBatches = batches.map((batch) => {
-      const transactions =
-        (batch.matchedTransactions || 0) +
-        (batch.amountMismatchCount || 0) +
-        (batch.dateMismatchCount || 0) +
-        (batch.missingInBankCount || 0) +
-        (batch.missingInLedgerCount || 0);
+      // Transactions = actual ledger transactions in the batch
+      const transactions = batch.totalLedgerTransactions || 0;
 
       return {
         _id: batch._id,
@@ -150,14 +146,18 @@ export const getBatches = async (req, res) => {
         createdAt: batch.createdAt,
         updatedAt: batch.updatedAt,
 
-        // Counts
+        // Transaction counts
+        totalLedgerTransactions: batch.totalLedgerTransactions || 0,
+        totalBankTransactions: batch.totalBankTransactions || 0,
+
+        // Reconciliation counts
         matchedTransactions: batch.matchedTransactions || 0,
         amountMismatchCount: batch.amountMismatchCount || 0,
         dateMismatchCount: batch.dateMismatchCount || 0,
         missingInBankCount: batch.missingInBankCount || 0,
         missingInLedgerCount: batch.missingInLedgerCount || 0,
 
-        // Calculated Fields
+        // Calculated fields
         transactions,
         progress: progressMap[batch.status] || 0,
       };
