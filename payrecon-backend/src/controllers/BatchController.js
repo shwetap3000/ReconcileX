@@ -1626,3 +1626,88 @@ export const resubmitBatch = async (req, res) => {
     });
   }
 };
+
+export const getBatchStats = async (req, res) => {
+  try {
+    const { role, _id } = req.user;
+
+    let query = {};
+
+    switch (role) {
+      case "ADMIN":
+        query = {};
+        break;
+
+      case "MAKER":
+        query = {
+          createdBy: _id,
+        };
+        break;
+
+      case "CHECKER":
+        query = {
+          status: {
+            $in: ["SUBMITTED", "UNDER_REVIEW", "APPROVED", "REJECTED"],
+          },
+        };
+        break;
+
+      default:
+        return res.status(403).json({
+          success: false,
+          message: "Unauthorized role",
+        });
+    }
+
+    const [totalBatches, reconciledBatches, pendingBatches, batchesWithIssues] =
+      await Promise.all([
+        Batch.countDocuments(query),
+
+        Batch.countDocuments({
+          ...query,
+          status: "RECONCILED",
+        }),
+
+        Batch.countDocuments({
+          ...query,
+          status: {
+            $in: [
+              "DRAFT",
+              "PARTIAL_UPLOAD",
+              "UPLOADED",
+              "SUBMITTED",
+              "UNDER_REVIEW",
+            ],
+          },
+        }),
+
+        Batch.countDocuments({
+          ...query,
+          $or: [
+            { amountMismatchCount: { $gt: 0 } },
+            { dateMismatchCount: { $gt: 0 } },
+            { missingInBankCount: { $gt: 0 } },
+            { missingInLedgerCount: { $gt: 0 } },
+          ],
+        }),
+      ]);
+
+    return res.status(200).json({
+      success: true,
+      role,
+      stats: {
+        totalBatches,
+        reconciledBatches,
+        pendingBatches,
+        batchesWithIssues,
+      },
+    });
+  } catch (error) {
+    console.error("Failed to fetch batch stats:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};

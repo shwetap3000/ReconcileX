@@ -5,7 +5,6 @@ import RecentActivity from "../components/dashboard/RecentActivity";
 import Navbar from "../components/layout/Navbar";
 import CustomDateButton from "../components/common/CustomDateButton";
 import DateRangeDropdown from "../components/common/DaysDropdown";
-import SearchBar from "../components/layout/SearchBar";
 
 function Dashboard() {
   return (
@@ -17,7 +16,6 @@ function Dashboard() {
         <>
         <DateRangeDropdown />
         <CustomDateButton />
-        <SearchBar />
         </>
        }/>
       <StatsGrid />

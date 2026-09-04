@@ -1,7 +1,7 @@
-import StatsGrid from "../dashboard/StatsGrid";
+import BatchStatsGrid from "./BatchStatsGrid";
 
 function BatchStats() {
-  return <StatsGrid />;
+  return <BatchStatsGrid />;
 }
 
 export default BatchStats;

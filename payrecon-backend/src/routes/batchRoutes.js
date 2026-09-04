@@ -13,7 +13,8 @@ import {
   approveBatch,
   rejectBatch,
   resubmitBatch,
-  getReconciliationResults
+  getReconciliationResults,
+  getBatchStats
 } from "../controllers/batchController.js";
 import { protect } from "../middleware/authMiddleware.js";
 import { authorizeRoles } from "../middleware/authorizeRoles.js";
@@ -55,6 +56,8 @@ router.get(
   authorizeRoles("ADMIN", "MAKER", "CHECKER"),
   getBatches,
 );
+
+router.get("/batch-stats", protect, getBatchStats);
 
 // Static routes
 router.get(

@@ -1,4 +1,5 @@
 import { Filter, Plus, ChevronDown } from "lucide-react";
+import SearchBar from "../layout/SearchBar";
 
 function BatchToolbar() {
   return (
@@ -36,6 +37,8 @@ function BatchToolbar() {
         <Plus size={18} />
         Create Batch
       </button>
+
+      <SearchBar />
     </div>
   );
 }

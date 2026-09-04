@@ -57,7 +57,7 @@ function DonutChartCard() {
     <div className="bg-[#141C28] border border-[#243041] rounded-2xl p-3 h-[340px] w-full">
       <div className="flex justify-between items-center">
         <h2 className="text-xl ml-2 font-semibold">
-          Transaction Status
+          Batch Status
         </h2>
       </div>
 
@@ -100,20 +100,20 @@ function DonutChartCard() {
             </h2>
 
             <p className="text-gray-400 text-sm mt-1">
-              Total
+              Total Batch
             </p>
           </div>
         </div>
 
         {/* Legend */}
 
-        <div className="w-50 flex flex-col justify-center gap-4">
+        <div className="w-55 flex flex-col justify-center gap-4">
           {statusData.map((item) => (
             <div
               key={item.name}
               className="flex justify-between items-center"
             >
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1">
                 <div
                   className="w-3 h-3 rounded-full"
                   style={{

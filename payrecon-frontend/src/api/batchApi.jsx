@@ -1,5 +1,10 @@
 import api from "./axios";
 
+export const getBatchStats = async () => {
+  const response = await api.get("/batches/batch-stats");
+  return response.data;
+};
+
 export const getBatches = async (page = 1, limit = 10) => {
   const { data } = await api.get("/batches", {
     params: {
