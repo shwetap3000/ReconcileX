@@ -8,7 +8,10 @@ function BatchTable() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // Pagination (for later)
+  // Status filter
+  const [statusFilter, setStatusFilter] = useState("ALL");
+
+  // Pagination
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
@@ -17,7 +20,7 @@ function BatchTable() {
       setLoading(true);
       setError("");
 
-      const response = await getBatches(page);
+      const response = await getBatches(page, 10, statusFilter);
 
       if (response.success) {
         setBatches(response.batches);
@@ -32,12 +35,21 @@ function BatchTable() {
     }
   };
 
+  // Fetch whenever page or status changes
   useEffect(() => {
     fetchBatches();
-  }, [page]);
+  }, [page, statusFilter]);
+
+  // Handle status change
+  const handleStatusChange = (status) => {
+    setStatusFilter(status);
+
+    // Go back to first page when changing filter
+    setPage(1);
+  };
 
   return (
-    <div className="bg-[#141C28] border border-[#243041] rounded-2xl overflow-hidden">
+    <div className="bg-[#141C28] border border-[#243041] rounded-2xl overflow-visible">
       {/* Header */}
 
       <div className="flex justify-between items-center px-6 py-4 border-b border-[#243041]">
@@ -49,7 +61,11 @@ function BatchTable() {
           </p>
         </div>
 
-        <BatchToolbar refreshBatches={fetchBatches} />
+        <BatchToolbar
+          statusFilter={statusFilter}
+          setStatusFilter={handleStatusChange}
+          refreshBatches={fetchBatches}
+        />
       </div>
 
       {/* Loading */}
@@ -64,6 +80,8 @@ function BatchTable() {
         </div>
       ) : (
         <>
+          {/* Table */}
+
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-[#111827] border-b border-[#243041]">

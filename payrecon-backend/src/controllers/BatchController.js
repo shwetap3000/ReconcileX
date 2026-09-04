@@ -78,6 +78,7 @@ export const getBatches = async (req, res) => {
     const skip = (page - 1) * limit;
 
     const { role, _id } = req.user;
+    const { status } = req.query;
 
     let query = {};
 
@@ -105,6 +106,11 @@ export const getBatches = async (req, res) => {
           success: false,
           message: "Unauthorized role",
         });
+    }
+
+    // Apply status filter
+    if (status && status !== "ALL") {
+      query.status = status;
     }
 
     const totalBatches = await Batch.countDocuments(query);

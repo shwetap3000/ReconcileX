@@ -5,11 +5,12 @@ export const getBatchStats = async () => {
   return response.data;
 };
 
-export const getBatches = async (page = 1, limit = 10) => {
+export const getBatches = async (page = 1, limit = 10, status = "ALL") => {
   const { data } = await api.get("/batches", {
     params: {
       page,
       limit,
+      status,
     },
   });
 
