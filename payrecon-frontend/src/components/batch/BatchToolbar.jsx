@@ -2,24 +2,41 @@ import { Filter, Plus, ChevronDown } from "lucide-react";
 import SearchBar from "../layout/SearchBar";
 import { useState } from "react";
 
-function BatchToolbar({ statusFilter, setStatusFilter }) {
+function BatchToolbar({
+  statusFilter,
+  onStatusChange,
+  search,
+  onSearchChange,
+  refreshBatches,
+}) {
   const [statusOpen, setStatusOpen] = useState(false);
 
   const statusOptions = [
     { value: "ALL", label: "All Status" },
     { value: "DRAFT", label: "Draft" },
-    { value: "PARTIAL_UPLOAD", label: "Partial Upload" },
+    {
+      value: "PARTIAL_UPLOAD",
+      label: "Partial Upload",
+    },
     { value: "UPLOADED", label: "Uploaded" },
     { value: "SUBMITTED", label: "Submitted" },
-    { value: "UNDER_REVIEW", label: "Under Review" },
+    {
+      value: "UNDER_REVIEW",
+      label: "Under Review",
+    },
     { value: "APPROVED", label: "Approved" },
     { value: "REJECTED", label: "Rejected" },
     { value: "RECONCILED", label: "Reconciled" },
   ];
 
+  const selectedStatus =
+    statusOptions.find((option) => option.value === statusFilter)?.label ||
+    "All Status";
+
   return (
-    <div className="flex items-center gap-3">
-      {/* Status Filter */}
+    <div className="flex items-center gap-3 relative z-[100]">
+      {/* Status Dropdown */}
+
       <div className="relative">
         <button
           type="button"
@@ -28,11 +45,7 @@ function BatchToolbar({ statusFilter, setStatusFilter }) {
         >
           <Filter size={18} />
 
-          <span>
-            {statusFilter === "ALL"
-              ? "All Status"
-              : statusFilter.replace("_", " ")}
-          </span>
+          <span>{selectedStatus}</span>
 
           <ChevronDown
             size={18}
@@ -41,13 +54,13 @@ function BatchToolbar({ statusFilter, setStatusFilter }) {
         </button>
 
         {statusOpen && (
-          <div className="absolute right-0 top-full mt-2 w-52 rounded-xl border border-slate-700 bg-slate-900 shadow-xl z-50 overflow-hidden">
+          <div className="absolute right-0 top-full mt-2 w-52 rounded-xl border border-slate-700 bg-slate-900 shadow-xl z-[100] overflow-hidden">
             {statusOptions.map((option) => (
               <button
                 key={option.value}
                 type="button"
                 onClick={() => {
-                  setStatusFilter(option.value);
+                  onStatusChange(option.value);
                   setStatusOpen(false);
                 }}
                 className={`w-full text-left px-4 py-3 text-sm transition ${
@@ -64,6 +77,7 @@ function BatchToolbar({ statusFilter, setStatusFilter }) {
       </div>
 
       {/* Create Batch */}
+
       <button
         type="button"
         className="
@@ -82,7 +96,8 @@ function BatchToolbar({ statusFilter, setStatusFilter }) {
       </button>
 
       {/* Search */}
-      <SearchBar />
+
+      <SearchBar value={search} onChange={onSearchChange} />
     </div>
   );
 }

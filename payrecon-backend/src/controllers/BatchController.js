@@ -78,10 +78,13 @@ export const getBatches = async (req, res) => {
     const skip = (page - 1) * limit;
 
     const { role, _id } = req.user;
-    const { status } = req.query;
+
+    const status = req.query.status || "ALL";
+    const search = req.query.search?.trim() || "";
 
     let query = {};
 
+    // Role based access
     switch (role) {
       case "ADMIN":
         query = {};
@@ -108,9 +111,33 @@ export const getBatches = async (req, res) => {
         });
     }
 
-    // Apply status filter
-    if (status && status !== "ALL") {
+    // Status filter
+    if (status !== "ALL") {
       query.status = status;
+    }
+
+    // Search filter
+    if (search) {
+      query.$or = [
+        {
+          batchId: {
+            $regex: search,
+            $options: "i",
+          },
+        },
+        {
+          batchName: {
+            $regex: search,
+            $options: "i",
+          },
+        },
+        {
+          createdByName: {
+            $regex: search,
+            $options: "i",
+          },
+        },
+      ];
     }
 
     const totalBatches = await Batch.countDocuments(query);
@@ -134,7 +161,7 @@ export const getBatches = async (req, res) => {
     };
 
     const formattedBatches = batches.map((batch) => {
-      // Transactions = actual ledger transactions in the batch
+      // Transactions = actual ledger transactions
       const transactions = batch.totalLedgerTransactions || 0;
 
       return {

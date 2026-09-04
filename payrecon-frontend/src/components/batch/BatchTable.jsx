@@ -8,19 +8,20 @@ function BatchTable() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // Status filter
-  const [statusFilter, setStatusFilter] = useState("ALL");
-
   // Pagination
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+
+  // Filters
+  const [statusFilter, setStatusFilter] = useState("ALL");
+  const [search, setSearch] = useState("");
 
   const fetchBatches = async () => {
     try {
       setLoading(true);
       setError("");
 
-      const response = await getBatches(page, 10, statusFilter);
+      const response = await getBatches(page, 10, statusFilter, search);
 
       if (response.success) {
         setBatches(response.batches);
@@ -35,16 +36,20 @@ function BatchTable() {
     }
   };
 
-  // Fetch whenever page or status changes
+  // Fetch whenever page, status or search changes
   useEffect(() => {
     fetchBatches();
-  }, [page, statusFilter]);
+  }, [page, statusFilter, search]);
 
-  // Handle status change
+  // Status filter changed
   const handleStatusChange = (status) => {
     setStatusFilter(status);
+    setPage(1);
+  };
 
-    // Go back to first page when changing filter
+  // Search changed
+  const handleSearchChange = (value) => {
+    setSearch(value);
     setPage(1);
   };
 
@@ -63,7 +68,9 @@ function BatchTable() {
 
         <BatchToolbar
           statusFilter={statusFilter}
-          setStatusFilter={handleStatusChange}
+          onStatusChange={handleStatusChange}
+          search={search}
+          onSearchChange={handleSearchChange}
           refreshBatches={fetchBatches}
         />
       </div>
@@ -80,9 +87,7 @@ function BatchTable() {
         </div>
       ) : (
         <>
-          {/* Table */}
-
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto overflow-y-visible">
             <table className="w-full">
               <thead className="bg-[#111827] border-b border-[#243041]">
                 <tr>
@@ -124,7 +129,9 @@ function BatchTable() {
                 ) : (
                   <tr>
                     <td colSpan={7} className="text-center py-12 text-gray-400">
-                      No batches found.
+                      {search
+                        ? `No batches found for "${search}".`
+                        : "No batches found."}
                     </td>
                   </tr>
                 )}
