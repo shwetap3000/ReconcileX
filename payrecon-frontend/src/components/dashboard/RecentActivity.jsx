@@ -1,10 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  Upload,
-  CircleCheckBig,
-  LoaderCircle,
-  CircleX,
-} from "lucide-react";
+import { Upload, CircleCheckBig, LoaderCircle, CircleX } from "lucide-react";
 import { Link } from "react-router-dom";
 import { getRecentActivities } from "../../api/dashboardApi";
 
@@ -68,18 +63,38 @@ function RecentActivity() {
               title = "File Uploaded";
               break;
 
+            case "LOGIN":
+              type = "processing";
+              title = "Login";
+              break;
+
+            case "LOGOUT":
+              type = "processing";
+              title = "Logout";
+              break;
+
             default:
               type = "processing";
           }
 
           return {
             id: activity._id,
+
             type,
+
             title,
+
+            user: activity.performedBy?.name || "Unknown",
+
+            role: activity.role || "",
+
             batch:
-              activity.batchId?.batchId ||
-              activity.batchId?.batchName ||
-              "N/A",
+              activity.batchId?.batchId || activity.batchId?.batchName || null,
+
+            description: activity.description || "",
+
+            status: activity.status,
+
             time: new Date(activity.createdAt).toLocaleString("en-IN", {
               day: "2-digit",
               month: "short",
@@ -102,24 +117,17 @@ function RecentActivity() {
 
   return (
     <div className="bg-[#141C28] border border-[#243041] rounded-2xl p-3 pl-4 h-full">
-      <h2 className="text-xl font-semibold mb-8">
-        Recent Activity
-      </h2>
+      <h2 className="text-xl font-semibold mb-8">Recent Activity</h2>
 
       <div className="space-y-5">
         {loading ? (
-          <p className="text-gray-400 text-center">
-            Loading activities...
-          </p>
+          <p className="text-gray-400 text-center">Loading activities...</p>
         ) : (
           activities.map((item) => {
             const Icon = icons[item.type];
 
             return (
-              <div
-                key={item.id}
-                className="flex justify-between items-start"
-              >
+              <div key={item.id} className="flex justify-between items-start">
                 <div className="flex gap-4">
                   <div
                     className={`w-10 h-10 rounded-full flex items-center justify-center ${colors[item.type]}`}
@@ -131,14 +139,17 @@ function RecentActivity() {
                     <p className="text-white">{item.title}</p>
 
                     <p className="text-sm text-gray-400 mt-1">
-                      {item.batch}
+                      {item.user}
+                      {item.role && ` • ${item.role}`}
                     </p>
+
+                    {item.batch && (
+                      <p className="text-xs text-gray-500 mt-1">{item.batch}</p>
+                    )}
                   </div>
                 </div>
 
-                <span className="text-sm text-gray-500">
-                  {item.time}
-                </span>
+                <span className="text-sm text-gray-500">{item.time}</span>
               </div>
             );
           })
@@ -146,10 +157,7 @@ function RecentActivity() {
       </div>
 
       <div className="mt-10 ml-25">
-        <Link
-          to="/audit"
-          className="w-full text-blue-400 hover:text-blue-300"
-        >
+        <Link to="/audit" className="w-full text-blue-400 hover:text-blue-300">
           View all activity →
         </Link>
       </div>
