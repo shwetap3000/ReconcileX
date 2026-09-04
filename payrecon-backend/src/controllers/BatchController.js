@@ -1243,6 +1243,65 @@ export const getReconciliationSummary = async (req, res) => {
   }
 };
 
+// Get reconciliation results for a batch
+export const getReconciliationResults = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Check if batch exists
+    const batch = await Batch.findById(id);
+
+    if (!batch) {
+      return res.status(404).json({
+        success: false,
+        message: "Batch not found",
+      });
+    }
+
+    // Fetch ledger transactions
+    const ledgerTransactions = await LedgerTransaction.find({
+      batchId: batch._id,
+    }).sort({ sourceRowNumber: 1 });
+
+    // Fetch bank transactions
+    const bankTransactions = await BankTransaction.find({
+      batchId: batch._id,
+    }).sort({ sourceRowNumber: 1 });
+
+    return res.status(200).json({
+      success: true,
+
+      batch: {
+        _id: batch._id,
+        batchId: batch.batchId,
+        batchName: batch.batchName,
+        status: batch.status,
+      },
+
+      summary: {
+        totalLedgerTransactions: ledgerTransactions.length,
+        totalBankTransactions: bankTransactions.length,
+
+        matchedTransactions: batch.matchedTransactions,
+        amountMismatchCount: batch.amountMismatchCount,
+        dateMismatchCount: batch.dateMismatchCount,
+        missingInBankCount: batch.missingInBankCount,
+        missingInLedgerCount: batch.missingInLedgerCount,
+      },
+
+      ledgerTransactions,
+      bankTransactions,
+    });
+  } catch (error) {
+    console.error("Get reconciliation results error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 // to get the batch details
 export const getBatchDetails = async (req, res) => {
   try {
