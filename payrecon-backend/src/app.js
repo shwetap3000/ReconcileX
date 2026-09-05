@@ -10,6 +10,7 @@ import batchRoutes from "./routes/batchRoutes.js";
 import reportRoutes from "./routes/reportRoutes.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
 import profileRoutes from "./routes/profileRoutes.js";
+import transactionRoutes from "./routes/transactionRoutes.js";
 
 const app = express();
 
@@ -31,6 +32,7 @@ app.use("/api/batches", batchRoutes);
 app.use("/api/reports", reportRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/profile", profileRoutes);
+app.use("/api/transactions", transactionRoutes);
 app.use("/uploads", express.static(path.resolve("uploads")));
 
 app.get("/api/test", (req, res) => {

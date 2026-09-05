@@ -62,7 +62,7 @@ function BatchTable() {
           <h2 className="text-xl font-semibold">All Batches</h2>
 
           <p className="text-gray-400 text-sm mt-1">
-            Manage and track reconciliation batches
+            Manage and track all batches
           </p>
         </div>
 
