@@ -75,12 +75,12 @@ function Users() {
 
       <UserStats users={users} />
 
-      <UserFilters
+      {/* <UserFilters
         roleFilter={roleFilter}
         setRoleFilter={setRoleFilter}
         statusFilter={statusFilter}
         setStatusFilter={setStatusFilter}
-      />
+      /> */}
 
       <UserTable
         users={filteredUsers}

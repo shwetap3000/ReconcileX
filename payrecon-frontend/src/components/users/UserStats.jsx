@@ -1,4 +1,5 @@
 import { Users, ShieldCheck, UserCog, UserCheck } from "lucide-react";
+import StatCard from "../dashboard/StatCard";
 
 function UserStats({ users = [] }) {
   const totalUsers = users.length;
@@ -15,66 +16,65 @@ function UserStats({ users = [] }) {
     (user) => user.role?.toUpperCase() === "CHECKER",
   ).length;
 
+  const getPercentage = (value) => {
+    if (totalUsers === 0) return 0;
+
+    return ((value / totalUsers) * 100).toFixed(2);
+  };
+
   const cards = [
     {
+      key: "totalUsers",
       title: "Total Users",
       value: totalUsers,
+      change: "100% of all users",
       icon: Users,
-      color: "text-blue-400",
-      bg: "bg-blue-500/15",
+      iconBg: "bg-blue-600",
+      changeColor: "text-blue-400",
     },
     {
+      key: "admins",
       title: "Admins",
       value: admins,
+      change: `${getPercentage(admins)}% of all users`,
       icon: ShieldCheck,
-      color: "text-indigo-400",
-      bg: "bg-indigo-500/15",
+      iconBg: "bg-indigo-600",
+      changeColor: "text-indigo-400",
     },
     {
+      key: "makers",
       title: "Makers",
       value: makers,
+      change: `${getPercentage(makers)}% of all users`,
       icon: UserCog,
-      color: "text-green-400",
-      bg: "bg-green-500/15",
+      iconBg: "bg-green-600",
+      changeColor: "text-green-400",
     },
     {
+      key: "checkers",
       title: "Checkers",
       value: checkers,
+      change: `${getPercentage(checkers)}% of all users`,
       icon: UserCheck,
-      color: "text-orange-400",
-      bg: "bg-orange-500/15",
+      iconBg: "bg-orange-500",
+      changeColor: "text-orange-400",
     },
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mt-6">
-      {cards.map((card) => {
-        const Icon = card.icon;
-
-        return (
-          <div
-            key={card.title}
-            className="bg-[#141C28] border border-[#243041] rounded-2xl p-6"
-          >
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="text-gray-400 text-sm">{card.title}</p>
-
-                <h2 className="text-3xl font-bold mt-2 text-white">
-                  {card.value}
-                </h2>
-              </div>
-
-              <div
-                className={`w-12 h-12 rounded-xl flex items-center justify-center ${card.bg}`}
-              >
-                <Icon className={card.color} size={22} />
-              </div>
-            </div>
-          </div>
-        );
-      })}
-    </div>
+    <section className="grid grid-cols-4 gap-3 mb-3">
+      {cards.map((card) => (
+        <StatCard
+          key={card.key}
+          title={card.title}
+          value={card.value}
+          change={card.change}
+          icon={card.icon}
+          iconBg={card.iconBg}
+          changeColor={card.changeColor}
+        />
+      ))}
+    </section>
   );
 }
 
