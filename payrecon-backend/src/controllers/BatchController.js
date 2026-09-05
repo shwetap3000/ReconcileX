@@ -1744,3 +1744,81 @@ export const getBatchStats = async (req, res) => {
     });
   }
 };
+
+export const getReconciliationStats = async (req, res) => {
+  try {
+    const { role, _id } = req.user;
+
+    let query = {};
+
+    switch (role) {
+      case "ADMIN":
+        query = {};
+        break;
+
+      case "MAKER":
+        query = {
+          createdBy: _id,
+        };
+        break;
+
+      case "CHECKER":
+        query = {
+          status: {
+            $in: ["SUBMITTED", "UNDER_REVIEW", "APPROVED", "REJECTED"],
+          },
+        };
+        break;
+
+      default:
+        return res.status(403).json({
+          success: false,
+          message: "Unauthorized role",
+        });
+    }
+
+    const batches = await Batch.find(query)
+      .select(
+        "status amountMismatchCount dateMismatchCount missingInBankCount missingInLedgerCount",
+      )
+      .lean();
+
+    const batchesToReconcile = batches.filter(
+      (batch) => batch.status === "UPLOADED",
+    ).length;
+
+    const underReview = batches.filter(
+      (batch) =>
+        batch.status === "SUBMITTED" || batch.status === "UNDER_REVIEW",
+    ).length;
+
+    const reconciledBatches = batches.filter(
+      (batch) => batch.status === "RECONCILED",
+    ).length;
+
+    const batchesWithExceptions = batches.filter(
+      (batch) =>
+        (batch.amountMismatchCount || 0) > 0 ||
+        (batch.dateMismatchCount || 0) > 0 ||
+        (batch.missingInBankCount || 0) > 0 ||
+        (batch.missingInLedgerCount || 0) > 0,
+    ).length;
+
+    return res.status(200).json({
+      success: true,
+      stats: {
+        batchesToReconcile,
+        underReview,
+        reconciledBatches,
+        batchesWithExceptions,
+      },
+    });
+  } catch (error) {
+    console.error("Get Reconciliation Stats Error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};

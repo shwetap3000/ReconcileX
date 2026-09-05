@@ -14,7 +14,8 @@ import {
   rejectBatch,
   resubmitBatch,
   getReconciliationResults,
-  getBatchStats
+  getBatchStats,
+  getReconciliationStats,
 } from "../controllers/batchController.js";
 import { protect } from "../middleware/authMiddleware.js";
 import { authorizeRoles } from "../middleware/authorizeRoles.js";
@@ -89,11 +90,11 @@ router.get("/:id/details", protect, getBatchDetails);
 router.get("/:id/reconciliation-summary", protect, getReconciliationSummary);
 router.get("/:id/reconciliation-results", protect, getReconciliationResults);
 router.post("/:id/reconcile", protect, reconcileBatch);
+router.get("/reconciliation-stats", protect, getReconciliationStats);
 router.patch("/:id/submit", protect, authorizeRoles("MAKER"), submitBatch);
 router.patch("/:id/approve", protect, authorizeRoles("CHECKER"), approveBatch);
 router.patch("/:id/reject", protect, authorizeRoles("CHECKER"), rejectBatch);
 router.patch("/:id/resubmit", protect, authorizeRoles("MAKER"), resubmitBatch);
-
 
 // Generic route (ALWAYS LAST)
 router.get("/:id", protect, authorizeRoles("ADMIN", "MAKER"), getBatchById);

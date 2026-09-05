@@ -1,7 +1,7 @@
-import StatsGrid from "../dashboard/StatsGrid";
+import ReconciliationStatsGrid from "./ReconciliatoinStatsGrid";
 
 function ReconciliationStats() {
-  return <StatsGrid />;
+  return <ReconciliationStatsGrid />;
 }
 
 export default ReconciliationStats;
