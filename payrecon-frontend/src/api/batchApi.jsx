@@ -38,6 +38,29 @@ export const getReconciliationSummary = async (id) => {
   return data;
 };
 
+export const getReconciliationResults = async (id) => {
+  const { data } = await api.get(`/batches/${id}/reconciliation-results`);
+  return data;
+};
+
+export const uploadLedgerFile = async (id, file) => {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const { data } = await api.post(`/batches/${id}/upload-ledger`, formData);
+
+  return data;
+};
+
+export const uploadBankFile = async (id, file) => {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const { data } = await api.post(`/batches/${id}/upload-bank`, formData);
+
+  return data;
+};
+
 export const reconcileBatch = async (id) => {
   const { data } = await api.post(`/batches/${id}/reconcile`);
   return data;
@@ -45,5 +68,23 @@ export const reconcileBatch = async (id) => {
 
 export const submitBatch = async (id) => {
   const { data } = await api.patch(`/batches/${id}/submit`);
+  return data;
+};
+
+export const approveBatch = async (id) => {
+  const { data } = await api.patch(`/batches/${id}/approve`);
+  return data;
+};
+
+export const rejectBatch = async (id, remarks) => {
+  const { data } = await api.patch(`/batches/${id}/reject`, {
+    remarks,
+  });
+
+  return data;
+};
+
+export const resubmitBatch = async (id) => {
+  const { data } = await api.patch(`/batches/${id}/resubmit`);
   return data;
 };
