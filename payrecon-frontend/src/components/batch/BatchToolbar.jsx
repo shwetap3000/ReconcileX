@@ -8,6 +8,7 @@ function BatchToolbar({
   search,
   onSearchChange,
   refreshBatches,
+  onCreateBatch,
 }) {
   const [statusOpen, setStatusOpen] = useState(false);
 
@@ -80,6 +81,7 @@ function BatchToolbar({
 
       <button
         type="button"
+        onClick={onCreateBatch}
         className="
           h-11
           px-4
