@@ -1,42 +1,63 @@
 import { MoreHorizontal } from "lucide-react";
+import StatusBadge from "../common/StatusBadge";
 
 function ReconciliationRow({ batch }) {
-  const statusStyles = {
-    Completed: "bg-green-500/15 text-green-400 border border-green-500/20",
+  const exceptions =
+    (batch.amountMismatchCount || 0) +
+    (batch.dateMismatchCount || 0) +
+    (batch.missingInBankCount || 0) +
+    (batch.missingInLedgerCount || 0);
 
-    Processing: "bg-blue-500/15 text-blue-400 border border-blue-500/20",
-
-    Pending: "bg-yellow-500/15 text-yellow-400 border border-yellow-500/20",
-
-    Failed: "bg-red-500/15 text-red-400 border border-red-500/20",
-  };
+  const transactions = batch.totalLedgerTransactions || 0;
+  const matched = batch.matchedTransactions || 0;
 
   return (
     <tr className="border-b border-[#243041] hover:bg-[#182233] transition">
-      <td className="px-6 py-2 font">{batch.id}</td>
-
-      <td className="px-6 py-2">{batch.name}</td>
-
-      <td className="px-6 py-2 text-gray-400">{batch.created}</td>
-
-      <td className="px-6 py-2">{batch.transactions.toLocaleString()}</td>
-
-      <td className="px-6 py-2 text-green-400">
-        {batch.matched.toLocaleString()}
+      {/* Batch ID */}
+      <td className="px-6 py-4 font-medium whitespace-nowrap">
+        {batch.batchId}
       </td>
 
-      <td className="px-6 py-2 text-red-400">{batch.exceptions}</td>
+      {/* Batch Name */}
+      <td className="px-6 py-4 whitespace-nowrap">{batch.batchName}</td>
 
-      <td className="px-6 py-2">
-        <span
-          className={`px-3 py-1 rounded-lg text-sm font-medium ${statusStyles[batch.status]}`}
+      {/* Created */}
+      <td className="px-6 py-4 text-gray-400 whitespace-nowrap">
+        {batch.createdAt
+          ? new Date(batch.createdAt).toLocaleDateString("en-IN", {
+              day: "2-digit",
+              month: "short",
+              year: "numeric",
+            })
+          : "—"}
+      </td>
+
+      {/* Transactions */}
+      <td className="px-6 py-4 whitespace-nowrap">
+        {transactions.toLocaleString("en-IN")}
+      </td>
+
+      {/* Matched */}
+      <td className="px-6 py-4 text-green-400 whitespace-nowrap">
+        {matched.toLocaleString("en-IN")}
+      </td>
+
+      {/* Exceptions */}
+      <td className="px-6 py-4 text-red-400 whitespace-nowrap">
+        {exceptions.toLocaleString("en-IN")}
+      </td>
+
+      {/* Status */}
+      <td className="px-6 py-4 whitespace-nowrap">
+        <StatusBadge status={batch.status} />
+      </td>
+
+      {/* Action */}
+      <td className="px-6 py-4 text-center">
+        <button
+          type="button"
+          className="w-10 h-10 rounded-lg border border-[#243041] flex items-center justify-center text-gray-400 hover:bg-[#1B2535] hover:text-white transition"
         >
-          {batch.status}
-        </span>
-      </td>
-
-      <td className="px-6 py-2 text-center">
-        <button className="w-10 h-10 rounded-lg border border-[#243041] flex items-center justify-center hover:bg-[#1B2535]">
           <MoreHorizontal size={18} />
         </button>
       </td>
