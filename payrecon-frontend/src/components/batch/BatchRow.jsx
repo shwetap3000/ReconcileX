@@ -1,57 +1,132 @@
 import { MoreHorizontal } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 function BatchRow({ batch }) {
-  const statusStyles = {
-    Draft: "bg-gray-500/15 text-gray-300 border border-gray-500/20",
+  const navigate = useNavigate();
 
-    "Files Uploaded": "bg-blue-500/15 text-blue-400 border border-blue-500/20",
+  const handleOpenBatch = () => {
+    if (!batch?._id) {
+      return;
+    }
 
-    Submitted: "bg-yellow-500/15 text-yellow-400 border border-yellow-500/20",
+    navigate(`/batch/${batch._id}`);
+  };
 
-    "Under Review":
-      "bg-orange-500/15 text-orange-400 border border-orange-500/20",
+  const formatDate = (date) => {
+    if (!date) {
+      return "-";
+    }
 
-    Approved: "bg-green-500/15 text-green-400 border border-green-500/20",
+    return new Date(date).toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  };
 
-    Rejected: "bg-red-500/15 text-red-400 border border-red-500/20",
+  const getStatusLabel = (status) => {
+    if (!status) {
+      return "-";
+    }
 
-    Reconciled:
-      "bg-emerald-500/15 text-emerald-400 border border-emerald-500/20",
+    return status.replace(/_/g, " ");
   };
 
   return (
-    <tr className="border-b border-[#243041] hover:bg-[#182233] transition">
-      <td className="px-6 py-4 font-medium">{batch.batchId}</td>
-
-      <td className="px-6 py-4">{batch.batchName}</td>
-
-      {/* Created By */}
-      <td className="px-6 py-4 text-gray-300">{batch.createdByName}</td>
-
-      {/* Created Date */}
-      <td className="px-6 py-4 text-gray-400">
-        {batch.createdAt
-          ? new Date(batch.createdAt).toLocaleDateString("en-GB", {
-              day: "2-digit",
-              month: "short",
-              year: "numeric",
-            })
-          : "-"}
-      </td>
-
-      <td className="px-6 py-4">{batch.transactions.toLocaleString()}</td>
-
-      <td className="px-6 py-4">
-        <span
-          className={`px-3 py-1 rounded-lg text-sm font-medium ${statusStyles[batch.status]}`}
-        >
-          {batch.status}
+    <tr
+      onClick={handleOpenBatch}
+      className="
+        border-b
+        border-[#243041]
+        cursor-pointer
+        hover:bg-[#1A2332]
+        transition-colors
+      "
+    >
+      {/* Batch ID */}
+      <td className="px-6 py-5">
+        <span className="font-semibold text-white">
+          {batch?.batchId || "-"}
         </span>
       </td>
 
-      <td className="px-6 py-4 text-center">
-        <button className="w-10 h-10 rounded-lg border border-[#243041] flex items-center justify-center hover:bg-[#1B2535]">
-          <MoreHorizontal size={18} />
+      {/* Batch Name */}
+      <td className="px-6 py-5">
+        <span className="text-white">{batch?.batchName || "-"}</span>
+      </td>
+
+      {/* Created By */}
+      <td className="px-6 py-5">
+        <span className="text-gray-300">{batch?.createdByName || "N/A"}</span>
+      </td>
+
+      {/* Created Date */}
+      <td className="px-6 py-5">
+        <span className="text-gray-400">{formatDate(batch?.createdAt)}</span>
+      </td>
+
+      {/* Transactions */}
+      <td className="px-6 py-5">
+        <span className="text-white">
+          {Number(batch?.transactions || 0).toLocaleString()}
+        </span>
+      </td>
+
+      {/* Status */}
+      <td className="px-6 py-5">
+        <span
+          className={`
+            inline-flex
+            items-center
+            rounded-md
+            px-0
+            py-1
+            text-sm
+            font-semibold
+            ${
+              batch?.status === "RECONCILED" || batch?.status === "APPROVED"
+                ? "text-green-400"
+                : batch?.status === "REJECTED"
+                  ? "text-red-400"
+                  : batch?.status === "SUBMITTED" ||
+                      batch?.status === "UNDER_REVIEW"
+                    ? "text-yellow-400"
+                    : batch?.status === "UPLOADED"
+                      ? "text-blue-400"
+                      : "text-gray-300"
+            }
+          `}
+        >
+          {getStatusLabel(batch?.status)}
+        </span>
+      </td>
+
+      {/* Action */}
+      <td
+        className="px-6 py-5 text-center"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <button
+          type="button"
+          onClick={handleOpenBatch}
+          className="
+            inline-flex
+            h-11
+            w-11
+            items-center
+            justify-center
+            rounded-lg
+            border
+            border-[#243041]
+            bg-[#141C28]
+            text-gray-300
+            transition
+            hover:bg-[#1B2535]
+            hover:text-white
+          "
+          title="Open batch"
+        >
+          <MoreHorizontal size={20} />
         </button>
       </td>
     </tr>
