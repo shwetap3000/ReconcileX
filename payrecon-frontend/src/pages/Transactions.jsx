@@ -24,7 +24,7 @@ function Transactions() {
       <PageContainer>
         <TransactionStats />
 
-        <TransactionFilters />
+        {/* <TransactionFilters /> */}
 
         <TransactionTable />
       </PageContainer>

@@ -216,3 +216,134 @@ export const getTransactions = async (req, res) => {
     });
   }
 };
+
+export const getTransactionStats = async (req, res) => {
+  try {
+    const { role, _id } = req.user;
+
+    let batchQuery = {};
+
+    switch (role) {
+      case "ADMIN":
+        batchQuery = {};
+        break;
+
+      case "MAKER":
+        batchQuery = {
+          createdBy: _id,
+        };
+        break;
+
+      case "CHECKER":
+        batchQuery = {
+          status: {
+            $in: ["SUBMITTED", "UNDER_REVIEW", "APPROVED", "REJECTED"],
+          },
+        };
+        break;
+
+      default:
+        return res.status(403).json({
+          success: false,
+          message: "Unauthorized role",
+        });
+    }
+
+    const batches = await Batch.find(batchQuery).select("_id").lean();
+
+    const batchIds = batches.map((batch) => batch._id);
+
+    if (batchIds.length === 0) {
+      return res.status(200).json({
+        success: true,
+        stats: {
+          totalTransactions: 0,
+          matched: 0,
+          pending: 0,
+          exceptions: 0,
+          matchedPercentage: 0,
+          pendingPercentage: 0,
+          exceptionsPercentage: 0,
+        },
+      });
+    }
+
+    // Ledger-side reconciliation results
+    const ledgerTransactions = await LedgerTransaction.find({
+      batchId: { $in: batchIds },
+    })
+      .select("reconciliationStatus")
+      .lean();
+
+    // Bank-only reconciliation results
+    const bankOnlyTransactions = await BankTransaction.find({
+      batchId: { $in: batchIds },
+      reconciliationStatus: "MISSING_IN_LEDGER",
+    })
+      .select("reconciliationStatus")
+      .lean();
+
+    const totalTransactions =
+      ledgerTransactions.length + bankOnlyTransactions.length;
+
+    const matched = ledgerTransactions.filter(
+      (transaction) => transaction.reconciliationStatus === "MATCHED",
+    ).length;
+
+    const pending = ledgerTransactions.filter(
+      (transaction) => transaction.reconciliationStatus === "PENDING",
+    ).length;
+
+    const amountMismatch = ledgerTransactions.filter(
+      (transaction) => transaction.reconciliationStatus === "AMOUNT_MISMATCH",
+    ).length;
+
+    const dateMismatch = ledgerTransactions.filter(
+      (transaction) => transaction.reconciliationStatus === "DATE_MISMATCH",
+    ).length;
+
+    const missingInBank = ledgerTransactions.filter(
+      (transaction) => transaction.reconciliationStatus === "MISSING_IN_BANK",
+    ).length;
+
+    const missingInLedger = bankOnlyTransactions.length;
+
+    const exceptions =
+      amountMismatch + dateMismatch + missingInBank + missingInLedger;
+
+    const matchedPercentage =
+      totalTransactions > 0
+        ? Number(((matched / totalTransactions) * 100).toFixed(2))
+        : 0;
+
+    const pendingPercentage =
+      totalTransactions > 0
+        ? Number(((pending / totalTransactions) * 100).toFixed(2))
+        : 0;
+
+    const exceptionsPercentage =
+      totalTransactions > 0
+        ? Number(((exceptions / totalTransactions) * 100).toFixed(2))
+        : 0;
+
+    return res.status(200).json({
+      success: true,
+      stats: {
+        totalTransactions,
+        matched,
+        pending,
+        exceptions,
+        matchedPercentage,
+        pendingPercentage,
+        exceptionsPercentage,
+      },
+    });
+  } catch (error) {
+    console.error("Get Transaction Stats Error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
