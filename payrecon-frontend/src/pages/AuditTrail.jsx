@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 
-import AuditFilters from "../components/audit/AuditFilters";
 import AuditTable from "../components/audit/AuditTable";
 import TodayActions from "../components/audit/TodayActions";
 import RecentActivity from "../components/audit/RecentActivity";
@@ -17,19 +16,34 @@ const AuditTrail = () => {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Pagination
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalLogs, setTotalLogs] = useState(0);
+
+  const limit = 10;
+
   const fetchAuditData = async () => {
     try {
       setLoading(true);
 
       const [logsRes, statsRes] = await Promise.all([
-        getAuditLogs(),
+        getAuditLogs({
+          page,
+          limit,
+        }),
         getAuditStats(),
       ]);
 
-      setLogs(logsRes.data.logs);
+      const logsData = logsRes.data;
+
+      setLogs(logsData.logs || []);
+      setTotalPages(logsData.totalPages || 1);
+      setTotalLogs(logsData.total || 0);
+
       setStats(statsRes.data.stats);
     } catch (error) {
-      console.error(error);
+      console.error("Failed to fetch audit data:", error);
     } finally {
       setLoading(false);
     }
@@ -37,7 +51,7 @@ const AuditTrail = () => {
 
   useEffect(() => {
     fetchAuditData();
-  }, []);
+  }, [page]);
 
   return (
     <>
@@ -55,10 +69,15 @@ const AuditTrail = () => {
 
       <div className="grid grid-cols-12 gap-6">
         <div className="col-span-9">
-          <AuditFilters />
-
           <div className="mt-6">
-            <AuditTable logs={logs} loading={loading} />
+            <AuditTable
+              logs={logs}
+              loading={loading}
+              page={page}
+              totalPages={totalPages}
+              totalLogs={totalLogs}
+              onPageChange={setPage}
+            />
           </div>
         </div>
 
