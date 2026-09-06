@@ -76,7 +76,7 @@ function ReconciliationSummaryCard({ batch, summary = {}, onRefresh }) {
   const handleViewResults = () => {
     if (!batch?._id) return;
 
-    navigate(`/batches/${batch._id}/reconciliation-results`);
+    navigate(`/batch/${batch._id}/reconciliation-results`);
   };
 
   return (

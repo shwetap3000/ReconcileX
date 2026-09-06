@@ -22,6 +22,7 @@ import MyProfile from "../pages/Myprofile";
 import Unauthorized from "../pages/Unauthorized";
 import Users from "../pages/Users";
 import UserDetailsPage from "../pages/UserDetailsPage";
+import ReconciliationResults from "../pages/ReconciliationResult";
 
 import Login from "../pages/Login";
 import ForgotPassword from "../pages/ForgotPassword";
@@ -52,6 +53,10 @@ function AppRoutes() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/transactions" element={<Transactions />} />
             <Route path="/reconciliation" element={<Reconciliation />} />
+            <Route
+              path="/batch/:id/reconciliation-results"
+              element={<ReconciliationResults />}
+            />
             <Route path="/upload" element={<UploadFiles />} />
             <Route path="/reports" element={<Reports />} />
             <Route path="/audit" element={<AuditTrail />} />
