@@ -88,3 +88,8 @@ export const resubmitBatch = async (id) => {
   const { data } = await api.patch(`/batches/${id}/resubmit`);
   return data;
 };
+
+export const getPendingReviewBatches = async () => {
+  const { data } = await api.get("/batches/pending-review");
+  return data;
+};

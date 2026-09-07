@@ -23,6 +23,8 @@ import Unauthorized from "../pages/Unauthorized";
 import Users from "../pages/Users";
 import UserDetailsPage from "../pages/UserDetailsPage";
 import ReconciliationResults from "../pages/ReconciliationResult";
+import PendingReview from "../pages/PendingReview";
+import BatchReview from "../pages/BatchReview";
 
 import Login from "../pages/Login";
 import ForgotPassword from "../pages/ForgotPassword";
@@ -67,6 +69,11 @@ function AppRoutes() {
             <Route path="/my-profile" element={<MyProfile />} />
             <Route path="/users" element={<Users />} />
             <Route path="/users/:id" element={<UserDetailsPage />} />
+            <Route
+              path="/reconciliation/pending-review"
+              element={<PendingReview />}
+            />
+            <Route path="/batch/:id/review" element={<BatchReview />} />
 
             <Route
               element={<RoleProtectedRoute allowedRoles={[ROLES.ADMIN]} />}
