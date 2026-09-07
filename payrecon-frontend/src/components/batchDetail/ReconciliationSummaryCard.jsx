@@ -1,131 +1,202 @@
 import { useState } from "react";
-import { CheckCircle2, Play, Send, ArrowRight, Loader2 } from "lucide-react";
-import { reconcileBatch, submitBatch } from "../../api/batchApi";
+import {
+  CheckCircle2,
+  Play,
+  Send,
+  AlertTriangle,
+  RotateCcw,
+  Eye,
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
+
+import {
+  reconcileBatch,
+  submitBatch,
+  resubmitBatch,
+  getReconciliationResults,
+} from "../../api/batchApi";
 
 function ReconciliationSummaryCard({ batch, summary = {}, onRefresh }) {
   const navigate = useNavigate();
 
-  const [reconciling, setReconciling] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
+  const [loading, setLoading] = useState("");
   const [error, setError] = useState("");
 
-  const status = batch?.status;
+  if (!batch) return null;
 
-  const totalLedger = Number(summary.totalLedgerTransactions ?? 0);
-  const totalBank = Number(summary.totalBankTransactions ?? 0);
-  const matched = Number(summary.matchedTransactions ?? 0);
-  const amountMismatch = Number(summary.amountMismatchCount ?? 0);
-  const dateMismatch = Number(summary.dateMismatchCount ?? 0);
-  const missingInBank = Number(summary.missingInBankCount ?? 0);
-  const missingInLedger = Number(summary.missingInLedgerCount ?? 0);
+  const {
+    totalLedgerTransactions = 0,
+    totalBankTransactions = 0,
+    matchedTransactions = 0,
+    amountMismatchCount = 0,
+    dateMismatchCount = 0,
+    missingInBankCount = 0,
+    missingInLedgerCount = 0,
+    totalExceptions = 0,
+    matchPercentage = 0,
+  } = summary;
 
-  const totalExceptions =
-    amountMismatch + dateMismatch + missingInBank + missingInLedger;
-
-  const matchPercentage =
-    totalLedger > 0 ? ((matched / totalLedger) * 100).toFixed(2) : "0.00";
+  // ==========================================
+  // START RECONCILIATION
+  // ==========================================
 
   const handleReconcile = async () => {
-    if (!batch?._id) return;
-
     try {
       setError("");
-      setReconciling(true);
+      setLoading("reconcile");
 
-      const response = await reconcileBatch(batch._id);
-
-      if (!response?.success) {
-        throw new Error(response?.message || "Reconciliation failed.");
-      }
+      await reconcileBatch(batch._id);
 
       await onRefresh?.();
-    } catch (error) {
-      console.error("Reconciliation failed:", error);
+    } catch (err) {
+      console.error("Reconciliation failed:", err);
 
       setError(
-        error.response?.data?.message ||
-          error.message ||
+        err.response?.data?.message ||
+          err.message ||
           "Failed to reconcile batch.",
       );
     } finally {
-      setReconciling(false);
+      setLoading("");
     }
   };
 
-  const handleSubmit = async () => {
-    if (!batch?._id) return;
+  // ==========================================
+  // SUBMIT FOR CHECKER REVIEW
+  // ==========================================
 
+  const handleSubmit = async () => {
     try {
       setError("");
-      setSubmitting(true);
+      setLoading("submit");
 
-      const response = await submitBatch(batch._id);
-
-      if (!response?.success) {
-        throw new Error(response?.message || "Failed to submit batch.");
-      }
+      await submitBatch(batch._id);
 
       await onRefresh?.();
-    } catch (error) {
-      console.error("Submit batch failed:", error);
+    } catch (err) {
+      console.error("Batch submission failed:", err);
 
       setError(
-        error.response?.data?.message ||
-          error.message ||
+        err.response?.data?.message ||
+          err.message ||
           "Failed to submit batch for review.",
       );
     } finally {
-      setSubmitting(false);
+      setLoading("");
     }
   };
 
-  const handleViewResults = () => {
-    if (!batch?._id) return;
+  // ==========================================
+  // RESUBMIT REJECTED BATCH
+  // ==========================================
 
-    navigate(`/batch/${batch._id}/reconciliation-results`);
+  const handleResubmit = async () => {
+    try {
+      setError("");
+      setLoading("resubmit");
+
+      await resubmitBatch(batch._id);
+
+      await onRefresh?.();
+    } catch (err) {
+      console.error("Batch resubmission failed:", err);
+
+      setError(
+        err.response?.data?.message ||
+          err.message ||
+          "Failed to resubmit batch.",
+      );
+    } finally {
+      setLoading("");
+    }
   };
 
-  const isComplete =
-    status === "RECONCILED" ||
-    status === "SUBMITTED" ||
-    status === "UNDER_REVIEW" ||
-    status === "APPROVED" ||
-    status === "REJECTED";
+  // ==========================================
+  // VIEW RECONCILIATION RESULTS
+  // ==========================================
+
+  const handleViewResults = async () => {
+    try {
+      setError("");
+      setLoading("results");
+
+      await getReconciliationResults(batch._id);
+
+      navigate(`/batch/${batch._id}/reconciliation-results`);
+    } catch (err) {
+      console.error("Failed to load reconciliation results:", err);
+
+      setError(
+        err.response?.data?.message ||
+          err.message ||
+          "Failed to load reconciliation results.",
+      );
+    } finally {
+      setLoading("");
+    }
+  };
+
+  // ==========================================
+  // STATUS HELPERS
+  // ==========================================
+
+  const isUploading =
+    batch.status === "DRAFT" || batch.status === "PARTIAL_UPLOAD";
+
+  const isUploaded = batch.status === "UPLOADED";
+
+  const isReconciled = batch.status === "RECONCILED";
+
+  const isSubmitted =
+    batch.status === "SUBMITTED" || batch.status === "UNDER_REVIEW";
+
+  const isRejected = batch.status === "REJECTED";
+
+  const isApproved = batch.status === "APPROVED";
 
   return (
     <div className="bg-[#141C28] border border-[#243041] rounded-xl p-4">
+      {/* ==========================================
+          HEADER
+      ========================================== */}
+
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold text-white">
           3. Reconciliation Summary
         </h2>
 
-        {status === "RECONCILED" && (
-          <span className="inline-flex items-center gap-1.5 text-sm font-medium text-green-400">
+        {isRejected && (
+          <div className="flex items-center gap-1.5 text-red-400 text-sm font-medium">
+            <AlertTriangle size={16} />
+            Rejected
+          </div>
+        )}
+
+        {isSubmitted && (
+          <div className="flex items-center gap-1.5 text-blue-400 text-sm font-medium">
+            <Send size={16} />
+            Submitted for Review
+          </div>
+        )}
+
+        {isApproved && (
+          <div className="flex items-center gap-1.5 text-green-400 text-sm font-medium">
+            <CheckCircle2 size={16} />
+            Approved
+          </div>
+        )}
+
+        {isReconciled && (
+          <div className="flex items-center gap-1.5 text-green-400 text-sm font-medium">
             <CheckCircle2 size={16} />
             Completed
-          </span>
+          </div>
         )}
-
-        {status === "SUBMITTED" && (
-          <span className="text-sm font-medium text-blue-400">
-            Submitted for Review
-          </span>
-        )}
-
-        {status === "UNDER_REVIEW" && (
-          <span className="text-sm font-medium text-yellow-400">
-            Under Review
-          </span>
-        )}
-
-        {!isComplete &&
-          status !== "RECONCILED" &&
-          status !== "SUBMITTED" &&
-          status !== "UNDER_REVIEW" && (
-            <span className="text-sm text-gray-500">Not Started</span>
-          )}
       </div>
+
+      {/* ==========================================
+          ERROR
+      ========================================== */}
 
       {error && (
         <div className="mb-4 rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-400">
@@ -133,146 +204,214 @@ function ReconciliationSummaryCard({ batch, summary = {}, onRefresh }) {
         </div>
       )}
 
+      {/* ==========================================
+          SUMMARY TABLE
+      ========================================== */}
+
       <div className="border border-[#243041] rounded-lg overflow-hidden">
-        <div className="flex items-center justify-between px-4 py-3 border-b border-[#243041]">
-          <span className="text-sm text-gray-400">Ledger Transactions</span>
-          <span className="text-sm font-semibold text-white">
-            {totalLedger}
-          </span>
-        </div>
+        <SummaryRow
+          label="Ledger Transactions"
+          value={totalLedgerTransactions}
+        />
 
-        <div className="flex items-center justify-between px-4 py-3 border-b border-[#243041]">
-          <span className="text-sm text-gray-400">Bank Transactions</span>
-          <span className="text-sm font-semibold text-white">{totalBank}</span>
-        </div>
+        <SummaryRow label="Bank Transactions" value={totalBankTransactions} />
 
-        <div className="flex items-center justify-between px-4 py-3 border-b border-[#243041]">
-          <span className="text-sm text-gray-400">Matched</span>
-          <span className="text-sm font-semibold text-green-400">
-            {matched}
-          </span>
-        </div>
+        <SummaryRow
+          label="Matched"
+          value={matchedTransactions}
+          valueClass="text-green-400"
+        />
 
-        <div className="flex items-center justify-between px-4 py-3 border-b border-[#243041]">
-          <span className="text-sm text-gray-400">Amount Mismatch</span>
-          <span className="text-sm font-semibold text-gray-400">
-            {amountMismatch}
-          </span>
-        </div>
+        <SummaryRow label="Amount Mismatch" value={amountMismatchCount} />
 
-        <div className="flex items-center justify-between px-4 py-3 border-b border-[#243041]">
-          <span className="text-sm text-gray-400">Date Mismatch</span>
-          <span className="text-sm font-semibold text-gray-400">
-            {dateMismatch}
-          </span>
-        </div>
+        <SummaryRow label="Date Mismatch" value={dateMismatchCount} />
 
-        <div className="flex items-center justify-between px-4 py-3 border-b border-[#243041]">
-          <span className="text-sm text-gray-400">Missing in Bank</span>
-          <span className="text-sm font-semibold text-gray-400">
-            {missingInBank}
-          </span>
-        </div>
+        <SummaryRow label="Missing in Bank" value={missingInBankCount} />
 
-        <div className="flex items-center justify-between px-4 py-3 border-b border-[#243041]">
-          <span className="text-sm text-gray-400">Missing in Ledger</span>
-          <span className="text-sm font-semibold text-gray-400">
-            {missingInLedger}
-          </span>
-        </div>
+        <SummaryRow label="Missing in Ledger" value={missingInLedgerCount} />
 
-        <div className="flex items-center justify-between px-4 py-3 border-b border-[#243041]">
-          <span className="text-sm text-gray-400">Total Exceptions</span>
-          <span className="text-sm font-semibold text-green-400">
-            {totalExceptions}
-          </span>
-        </div>
+        <SummaryRow
+          label="Total Exceptions"
+          value={totalExceptions}
+          valueClass={totalExceptions > 0 ? "text-green-400" : "text-gray-300"}
+        />
 
-        <div className="flex items-center justify-between px-4 py-3">
-          <span className="text-sm text-gray-400">Match Rate</span>
-          <span className="text-sm font-semibold text-yellow-400">
-            {matchPercentage}%
-          </span>
-        </div>
+        <SummaryRow
+          label="Match Rate"
+          value={`${Number(matchPercentage).toFixed(2)}%`}
+          valueClass="text-yellow-400"
+          last
+        />
       </div>
 
-      <div className="mt-4 space-y-2">
-        {status === "UPLOADED" && (
-          <button
-            type="button"
-            onClick={handleReconcile}
-            disabled={reconciling}
-            className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-[#536DFE] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#4358e8] disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {reconciling ? (
-              <>
-                <Loader2 size={17} className="animate-spin" />
-                Reconciling...
-              </>
-            ) : (
-              <>
-                <Play size={17} />
-                Start Reconciliation
-              </>
-            )}
-          </button>
-        )}
+      {/* ==========================================
+          DRAFT / PARTIAL UPLOAD
+      ========================================== */}
 
-        {/* View Results - available after reconciliation */}
-        {[
-          "RECONCILED",
-          "SUBMITTED",
-          "UNDER_REVIEW",
-          "APPROVED",
-          "REJECTED",
-        ].includes(status) && (
+      {isUploading && (
+        <div className="mt-4 rounded-lg border border-blue-500/20 bg-blue-500/5 px-4 py-3 text-sm text-blue-400">
+          Upload both ledger and bank files to continue reconciliation.
+        </div>
+      )}
+
+      {/* ==========================================
+          UPLOADED
+      ========================================== */}
+
+      {isUploaded && (
+        <button
+          type="button"
+          onClick={handleReconcile}
+          disabled={loading !== ""}
+          className="mt-4 w-full h-10 rounded-lg bg-[#506CF5] hover:bg-[#405BE0] text-white font-medium flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <Play size={16} />
+
+          {loading === "reconcile" ? "Reconciling..." : "Start Reconciliation"}
+        </button>
+      )}
+
+      {/* ==========================================
+          RECONCILED
+      ========================================== */}
+
+      {isReconciled && (
+        <div className="mt-4 space-y-2">
+          {/* View Results */}
+
           <button
             type="button"
             onClick={handleViewResults}
-            className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-[#536DFE] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#4358e8]"
+            disabled={loading !== ""}
+            className="w-full h-10 rounded-lg bg-[#506CF5] hover:bg-[#405BE0] text-white font-medium flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            View Results
-            <ArrowRight size={17} />
-          </button>
-        )}
+            <Eye size={16} />
 
-        {/* Submit only when reconciliation is completed */}
-        {status === "RECONCILED" && (
+            {loading === "results"
+              ? "Loading Results..."
+              : "View Reconciliation Results"}
+          </button>
+
+          {/* Submit */}
+
           <button
             type="button"
             onClick={handleSubmit}
-            disabled={submitting}
-            className="w-full inline-flex items-center justify-center gap-2 rounded-lg border border-[#2d4058] bg-[#111925] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#182231] disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={loading !== ""}
+            className="w-full h-10 rounded-lg border border-blue-500/40 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 font-medium flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {submitting ? (
-              <>
-                <Loader2 size={17} className="animate-spin" />
-                Submitting...
-              </>
-            ) : (
-              <>
-                <Send size={17} />
-                Submit for Review
-              </>
-            )}
+            <Send size={16} />
+
+            {loading === "submit"
+              ? "Submitting..."
+              : "Submit for Checker Review"}
           </button>
-        )}
+        </div>
+      )}
 
-        {/* Submitted state */}
-        {status === "SUBMITTED" && (
-          <div className="rounded-lg border border-blue-500/20 bg-blue-500/10 px-4 py-3 text-center text-sm text-blue-400">
-            This batch has been submitted and is waiting for Checker review.
+      {/* ==========================================
+          SUBMITTED / UNDER REVIEW
+      ========================================== */}
+
+      {isSubmitted && (
+        <div className="mt-4 rounded-lg border border-blue-500/20 bg-blue-500/10 px-4 py-3 text-center text-sm text-blue-400">
+          This batch has been submitted and is waiting for Checker review.
+        </div>
+      )}
+
+      {/* ==========================================
+          REJECTED
+      ========================================== */}
+
+      {isRejected && (
+        <div className="mt-4 space-y-3">
+          {/* Rejection Message */}
+
+          <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3">
+            <div className="flex items-start gap-2">
+              <AlertTriangle
+                size={17}
+                className="text-red-400 mt-0.5 shrink-0"
+              />
+
+              <div>
+                <p className="text-sm font-medium text-red-300">
+                  This batch was rejected by the Checker.
+                </p>
+
+                <p className="text-xs text-red-400/80 mt-1">
+                  Review the rejection remarks above before resubmitting.
+                </p>
+              </div>
+            </div>
           </div>
-        )}
 
-        {/* Under review state */}
+          {/* Rejected Batch Actions */}
 
-        {status === "UNDER_REVIEW" && (
-          <div className="rounded-lg border border-yellow-500/20 bg-yellow-500/10 px-4 py-3 text-center text-sm text-yellow-400">
-            This batch is currently under review.
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {/* View Results */}
+
+            <button
+              type="button"
+              onClick={handleViewResults}
+              disabled={loading !== ""}
+              className="h-10 rounded-lg bg-[#506CF5] hover:bg-[#405BE0] text-white font-medium flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Eye size={16} />
+
+              {loading === "results" ? "Loading..." : "View Results"}
+            </button>
+
+            {/* Resubmit */}
+
+            <button
+              type="button"
+              onClick={handleResubmit}
+              disabled={loading !== ""}
+              className="h-10 rounded-lg border border-blue-500/40 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 font-medium flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <RotateCcw size={16} />
+
+              {loading === "resubmit"
+                ? "Resubmitting..."
+                : "Resubmit for Review"}
+            </button>
           </div>
-        )}
-      </div>
+        </div>
+      )}
+
+      {/* ==========================================
+          APPROVED
+      ========================================== */}
+
+      {isApproved && (
+        <div className="mt-4 rounded-lg border border-green-500/20 bg-green-500/10 px-4 py-3 text-center text-sm text-green-400">
+          This batch has been approved by the Checker.
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ==========================================
+   SUMMARY ROW
+========================================== */
+
+function SummaryRow({
+  label,
+  value,
+  valueClass = "text-gray-300",
+  last = false,
+}) {
+  return (
+    <div
+      className={`flex items-center justify-between px-4 py-3 ${
+        !last ? "border-b border-[#243041]" : ""
+      }`}
+    >
+      <span className="text-sm text-gray-400">{label}</span>
+
+      <span className={`text-sm font-medium ${valueClass}`}>{value}</span>
     </div>
   );
 }
